@@ -46,13 +46,22 @@ router.post('/signup', (req, res, next) => {
 
   const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 
-  User.create(new User({
-    username,
-    password: hash,
-    email,
-  }))
-    .then(user => res.status(200).json(user))
-    .catch(err => res.status(400).json(err));
+  User.find({username: {$eq: username}})
+    .then(user => {
+      if (user[0] === undefined) {
+        User.create(new User({
+          username,
+          password: hash,
+          email,
+        }))
+          .then(user => res.status(200).json({message: 'Usuário criado com sucesso!', user}))
+          .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!', err}));
+      } else {
+        res.status(400).json({message: 'Usuário já existe no banco de dados!'});
+      }
+    })
+    .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!!!', err}))
+
 });
 
 router.post('/edit', (req, res, next) => {
