@@ -67,10 +67,15 @@ router.post('/signup', (req, res, next) => {
 });
 
 router.post('/edit', (req, res, next) => {
-  const {email} = req.body;
-  User.findOneAndUpdate({_id: req.user._id}, {$set: {email}}, {new: true})
-    .then(user => res.status(200).json(user))
-    .catch(err => res.status(400).json(err))
+  if (req.isAuthenticated()) {
+    const {email} = req.body;
+    User.findOneAndUpdate({_id: req.user._id}, {$set: {email}}, {new: true})
+      .then(user => res.status(200).json(user))
+      .catch(err => res.status(400).json(err))
+  } else {
+    console.log('aqui')
+    res.status(401).json({message: 'Você não está logado!'});
+  }
 });
 
 router.get('/logout', (req, res, next) => {
