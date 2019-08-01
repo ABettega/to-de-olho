@@ -7,7 +7,7 @@ const passport = require('../config/passport');
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, failureMessage) => {
     if (err) {
-      res.status(500).json({message:'Something went wrong!'})
+      res.status(500).json({message:'Algo deu errado!'})
       return;
     }
 
@@ -18,7 +18,7 @@ router.post('/login', (req, res, next) => {
 
     req.login(user, (err) => {
       if (err) {
-        res.status(500).json({message:'Session is screwed up!'});
+        res.status(500).json({message:'Erro na sessão!'});
         return;
       }
       res.status(200).json(user);
@@ -50,11 +50,11 @@ router.post('/edit', (req, res, next) => {
 
 router.get('/logout', (req, res, next) => {
   req.logout();
-  res.status(200).json({ message: 'Log out success!' });
+  res.status(200).json({ message: 'Log out com sucesso!' });
 });
 
 router.get('/loggedin', (req, res, next) => {
-  req.isAuthenticated() ? res.status(200).json(req.user) : res.status(403).json({ message: 'Unauthorized' });
+  req.isAuthenticated() ? res.status(200).json(req.user) : res.status(403).json({ message: 'Não autorizado' });
 });
 
 module.exports = router;
