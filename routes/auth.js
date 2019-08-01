@@ -27,7 +27,7 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/signup', (req, res, next) => {
-  const {username, password, campus, course} = req.body;
+  const {username, password, email} = req.body;
   console.log(username)
 
   const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
@@ -35,16 +35,15 @@ router.post('/signup', (req, res, next) => {
   User.create(new User({
     username,
     password: hash,
-    campus,
-    course
+    email,
   }))
     .then(user => res.status(200).json(user))
     .catch(err => res.status(400).json(err));
 });
 
 router.post('/edit', (req, res, next) => {
-  const {username, campus, course} = req.body;
-  User.findOneAndUpdate({_id: req.user._id}, {$set: {username, campus, course}}, {new: true})
+  const {email} = req.body;
+  User.findOneAndUpdate({_id: req.user._id}, {$set: {email}}, {new: true})
     .then(user => res.status(200).json(user))
     .catch(err => res.status(400).json(err))
 });
