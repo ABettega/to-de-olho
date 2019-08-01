@@ -42,8 +42,6 @@ app.use(require('node-sass-middleware')({
   sourceMap: true
 }));
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 
@@ -51,13 +49,16 @@ app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 app.locals.title = 'Nitido!';
 
 app.use(session({
-  secret: "rest-api-aroldo",
+  secret: "rest-api-nitido",
   resave: true,
   saveUninitialized: true
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+const authRoutes = require('./routes/auth');
+app.use('/auth/', authRoutes);
 
 const index = require('./routes/index');
 app.use('/', index);
