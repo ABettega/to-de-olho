@@ -5,25 +5,27 @@ const bcrypt = require('bcryptjs');
 const passport = require('../config/passport');
 
 router.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, user, failureMessage) => {
-    if (err) {
-      res.status(500).json({message:'Algo deu errado!'})
-      return;
-    }
-
-    if (!user) {
-      res.status(401).json(failureMessage);
-      return;
-    }
-
-    req.login(user, (err) => {
+  passport.authenticate('local', 
+    {badRequestMessage: 'Você deve preencher o nome do usuário e a senha!'}, 
+    (err, user, failureMessage) => {
       if (err) {
-        res.status(500).json({message:'Erro na sessão!'});
+        res.status(500).json({message: 'Algo deu errado!'})
         return;
       }
-      res.status(200).json(user);
-    })
-  })(req, res, next);
+
+      if (!user) {
+        res.status(401).json(failureMessage);
+        return;
+      }
+
+      req.login(user, (err) => {
+        if (err) {
+          res.status(500).json({message: 'Erro na sessão!'});
+          return;
+        }
+        res.status(200).json(user);
+      })
+    })(req, res, next);
 });
 
 router.post('/signup', (req, res, next) => {
@@ -57,7 +59,7 @@ router.post('/signup', (req, res, next) => {
           .then(user => res.status(200).json({message: 'Usuário criado com sucesso!', user}))
           .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!', err}));
       } else {
-        res.status(400).json({message: 'Usuário já existe no banco de dados!'});
+        res.status(400).json({message: 'Este nome de usuário já existe no banco de dados!'});
       }
     })
     .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!!!', err}))
@@ -77,7 +79,7 @@ router.get('/logout', (req, res, next) => {
 });
 
 router.get('/loggedin', (req, res, next) => {
-  req.isAuthenticated() ? res.status(200).json(req.user) : res.status(403).json({ message: 'Não autorizado' });
+  req.isAuthenticated() ? res.status(200).json(req.user) : res.status(401).json({ message: 'Você não está logado!' });
 });
 
 module.exports = router;
