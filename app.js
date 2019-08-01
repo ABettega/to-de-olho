@@ -12,7 +12,9 @@ const session = require('express-session');
 
 mongoose
   .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true
   })
   .then(x => {
     console.log(`Conectado ao MongoDB! Nome da Database: "${x.connections[0].name}"`)

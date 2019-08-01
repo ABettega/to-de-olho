@@ -28,7 +28,21 @@ router.post('/login', (req, res, next) => {
 
 router.post('/signup', (req, res, next) => {
   const {username, password, email} = req.body;
-  console.log(username)
+
+  if (username === '' || username === undefined) {
+    res.status(400).json({message: 'É obrigatório inserir o nome de usuário!'});
+    return;
+  }
+
+  if (email === '' || email === undefined) {
+    res.status(400).json({message: 'É obrigatório inserir o email!'});
+    return;
+  }
+
+  if (password === '' || password === undefined) {
+    res.status(400).json({message: 'É obrigatório inserir a senha!'});
+    return;
+  }
 
   const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 
