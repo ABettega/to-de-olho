@@ -1,5 +1,9 @@
 const puppeteer = require('puppeteer');
- 
+
+const sessoesPorDia = [];
+let counter = 1;
+const plenario = [];
+
 (async () => {
   try {
     const browser = await puppeteer.launch();
@@ -9,65 +13,122 @@ const puppeteer = require('puppeteer');
       page.waitForNavigation({waitUntil: 'networkidle2'}),
       page.click("input[name='btnAnterior']"),
     ]);
-    const arr = [];
-    // const lis = await page.$$('#content > .listaMarcada');
-    // const sessoes = await page.$$('#content > .sessaoPagina');
+
+    // Pega as datas de trabalho da câmara e os grupos de sessões de cada dia
     const content = await page.$('#content');
-    const sessoes = await content.$$eval('h5', (h5s => h5s.map(h5 => h5.innerText)));
-    const listasMarcadas = await content.$$eval('.listaMarcada > li > ul > li > a', (
-      lis => lis.map(li => {
-        // console.log(li.innerHTML === 'Relação de presença na Sessão por Partido');
-        if (li.innerText === 'Relação de presença na Sessão por Partido') {
-          return li.href;
-        }
+    const dataSessoes = await content.$$eval('h5', (h5s => h5s.map(h5 => h5.innerText)));
+    const listasMarcadas = await content.$$('.listaMarcada');
+
+    // Para cada dia, checa a presença dos deputados nas sessões e os votos deles em cada votação
+    for (let listaMarcada of listasMarcadas) {
+      const sessoes = [];
+
+      console.log(counter);
+      counter++;
+      // SESSÕES
+        // Salva os nomes das sessões
+      const sessao = await listaMarcada.$$eval('li > a', a => a.map(link => link.innerText.includes('SESSÃO') ? link.innerText : null).filter(a => a !== null));
+      sessao.forEach(ses => sessoes.push({nomeDaSessao: ses, votacoes: []}));
+
+      const listaDePresenca = await listaMarcada.$$eval('li > a', a => a.map(link => link.innerText.includes('Relação de presença na Sessão por Partido') ? link.href : null).filter(n => n !== null));
+
+      // // Para cada sessao de um dia, abre uma nova página e pega os horários e os presentes
+      for (x = 0; x < sessao.length; x += 1) {
+        const propPage = await browser.newPage();
+        await propPage.goto(listaDePresenca[x], {waitUntil: 'networkidle2'});
+
+        // Pega as datas e horários de início e fim da sessão
+        const ps = await propPage.$('#coluna2');
+        const hor = await ps.$$eval('p', ps => [
+          ps[1].innerText.split(' ')[1] + ' ' + ps[1].innerText.split(' ')[2], 
+          ps[2].innerText.split(' ')[1] + ' ' + ps[2].innerText.split(' ')[2]
+        ]);
+        sessoes[x].inicio = hor[0];
+        sessoes[x].fim = hor[1];
+
+        // Pega a lista de presença dos deputados e salva no array;
+        const listagem = await propPage.$('#listagem > table');
+        const deputados = await listagem.$$eval('td', td => td.map(dep => 
+          dep.getAttribute('align') ? null : dep.innerText).filter(n => n !== null));
+        sessoes[x].listaDePresenca = deputados;
+        await propPage.close();
       }
-      ))); 
 
-    await console.log(listasMarcadas);
+                // VOTAÇÕES
+          // Encontra o link para cada votação
+          const listaDeVotacoes = await listaMarcada.$$eval('li > a', a => a.map(link => link.innerText.includes('Relação de votantes por partido') ? link.href : null).filter(n => n !== null));
 
+          // Para cada votação, acessa a página 
+          for(let y = 0; y < listaDeVotacoes.length; y += 1) {
+            const votacao = {};
+            const votPage = await browser.newPage();
+            await votPage.goto(listaDeVotacoes[y], {waitUntil: 'networkidle2'});
+            const nomeDaSessao = await votPage.$$eval('#corpoVotacao > p > strong', nome => nome[0].innerHTML.split('<br>')[2].trim().replace('  ', ' '));
+            
+            // Se a votação for da sessão atual, faz a extração do nome da proposição e dos votos e salva no objeto
+            for (let x = 0; x < sessoes.length; x += 1) {
+              if (nomeDaSessao === sessoes[x].nomeDaSessao) {
+                let titulo = await votPage.$$eval('#corpoVotacao > p', ps => ps.map(p => p.innerText));
+                // Pega o nome da proposição e já arruma como precisaremos pra API
+                titulo = titulo[2].split(': ')[1].split(' - ');
+                votacao.documento = {
+                  siglaTipo: titulo[0].split(' ')[0],
+                  numero: titulo[0].split(' ')[2].split('/')[0],
+                  ano: titulo[0].split(' ')[2].split('/')[1],
+                }
+                votacao.proposicao = titulo.slice(1, titulo.length - 1).join(' - ');
+                votacao.modo = titulo[titulo.length - 1];
+  
+                // Pega os deputados e os votos e salva na sessão correta
+                votacao.votos = [];
+                const listagem = await votPage.$('#listagem > table');
+                const votoPorDeputado = await listagem.$$eval('tr > td', tds => tds.filter(td => !td.getAttribute('colspan')).map(td => td.innerText));
+                for (let voto = 0; voto < votoPorDeputado.length; voto += 3) {
+                  votacao.votos.push({
+                    deputado: votoPorDeputado[voto],
+                    voto: votoPorDeputado[voto + 2],
+                  }) 
+                }
+                sessoes[x].votacoes.push(votacao);
+              } 
+            }
+          }
 
+      sessoesPorDia.push(sessoes);
+    }
 
+    // Organiza todos as plenarias em um array de objetos
+    for (let x = 0; x < dataSessoes.length; x += 1) {
+      plenario.push({
+        data: dataSessoes[x],
+        sessoes: sessoesPorDia[x],
+      })
+    }
+    console.log(plenario);
 
-
-
-
-
-    // const dados = await lis[0].$eval('li', result => result.innerText)
-    // await console.log(dados)
-    // for (const sessao of sessoes) {
-      // console.log(sessao);
-      // console.log(sessao.innerHTML);
-      // await page.$eval('h5', h5 => { console.log(h5.innerHTML); return h5.innerHTML});
-      // sessao.('h5', h5 => { console.log(h5.innerHTML); return h5.innerHTML});
-
-      // const dados = await page.$eval('li', li => li.innerText.split(' - '));
-    // }
+    //SALVA A PLENARIA DO MÊS NO BANCO DE DADOS ANTES DE COMEÇAR A PRÓXIMA PÁGINA
     
-    // for (const li of lis) {
-    // //   // const sessaoExt = {
-    // //   //   data: 0,
-    // //   //   nomeSessao: '',
-    // //   // };
 
-    //   // const dados = await page.$eval('li', li => li.innerText.split(' - '));
-    //   // console.log(dados)
-    // //   // sessaoExt.data = await dados[2].slice(0, 10);
-    // //   // sessaoExt.nomeSessao =  await dados[1];
-    // //   // console.log(sessaoExt);
 
-    //   // await li.$eval('li', el => console.log(el.innerHTML))
-    // }
-    
-    // .then(links => {
-    //   for (let link in links) {
-    //     // console.log(link)
-    //     links[link].$eval('a', a => console.log('------------->', a.innerText)).then(res => {
-    //       console.log('------------------->', res);
-    //       arr.push(res)
-    //     }).catch(err => console.log(err, '| erro:', 2));
-    //   }
-    //   // console.log(arr);
-    // }).catch(err => console.log(err, '| erro:', 1));  
+
+
+      //#content
+        //h5 -> data
+        //ul .listaMarcada
+          //li -> sessão extraordinária
+//----------->//li -> hora da sessão
+//----------->//a -> Nome da sessão no innerHTML
+              //ul
+                //li[1] 
+//--------------->//a -> Relação de presença na Sessão por Partido 
+//--------------PARA CADA VOTAÇÃO-------------------------------------->
+                //li
+//--------------->//strong -> hora da votação
+                  //span -> 'proposição'
+//--------------->//a -> link com nome da proposição (o link, quando clicado, tem o ID da proposição para usar na API)
+//--------------->//span -> com descrição do que foi votado
+                  //ul
+//----------------->//li[1] -> Relação de votantes por partido (tem o link para a votação)
 
 
     await browser.close();
