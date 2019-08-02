@@ -12,7 +12,7 @@ const session = require('express-session');
 
 mongoose
   .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true
+    useNewUrlParser: true,
   })
   .then(x => {
     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`)
