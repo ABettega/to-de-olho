@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const senadoHistoricoSchema = new Schema({
+const senadoTodosSchema = new Schema({
   IdentificacaoParlamentar: {
     CodigoParlamentar: Number,
     NomeParlamentar: String,
@@ -12,9 +12,14 @@ const senadoHistoricoSchema = new Schema({
     UrlFotoParlamentar: String,
     UrlPaginaParlamentar: String,
     EmailParlamentar: String,
-    SiglaPartidoParlamentar: String,
   },
-  Mandato: {
+  DadosBasicosParlamentar: {
+    DataNascimento: Date,
+    UfNaturalidade: String,
+    EnderecoParlamentar: String,
+    TelefoneParlamentar: String,
+  },
+  UltimoMandato: {
     CodigoMandato: Number,
     UfParlamentar: String,
     PrimeiraLegislaturaDoMandato: {
@@ -27,7 +32,6 @@ const senadoHistoricoSchema = new Schema({
       DataInicio: Date,
       DataFim: Date,
     },
-    UrlPaginaNoMandato: String,
     DescricaoParticipacao: String,
     Suplentes: {
       Suplente: [
@@ -44,19 +48,34 @@ const senadoHistoricoSchema = new Schema({
       ],
     },
     Exercicios: {
-      Exercicio: [{
-        CodigoExercicio: Number,
-        DataInicio: Date,
-        DataFim: Date,
-        SiglaCausaAfastamento: String,
-        DescricaoCausaAfastamento: String,
-        DataLeitura: Date,
-      }],
+      Exercicio: [
+        {
+          CodigoExercicio: Number,
+          DataInicio: Date,
+          DataFim: Date,
+          DescricaoCausaAfastamento: String,
+        },
+        {
+          CodigoExercicio: Number,
+          DataInicio: Date,
+          DataFim: Date,
+          DescricaoCausaAfastamento: String,
+        },
+      ],
     },
+  },
+  OutrasInformacoes: {
+    Servico: [
+      {
+        NomeServico: String,
+        DescricaoServico: String,
+        UrlServico: String,
+      },
+    ],
   },
   UrlGlossario: String,
 });
 
-const SenadoHistorico = mongoose.model('SenadoHistorico', senadoHistoricoSchema);
+const SenadoTodos = mongoose.model('SenadoTodo', senadoTodosSchema);
 
-module.exports = SenadoHistorico;
+module.exports = SenadoTodos;
