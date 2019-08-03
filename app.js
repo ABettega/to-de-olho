@@ -60,6 +60,9 @@ app.use(passport.session());
 const authRoutes = require('./routes/auth');
 app.use('/auth/', authRoutes);
 
+const deputadoRoutes = require('./routes/deputados');
+app.use('/deputado/', deputadoRoutes);
+
 const index = require('./routes/index');
 app.use('/', index);
 
