@@ -5,6 +5,7 @@ const deputadoSchema = new Schema({
   id: {type: Number, unique: true},
   nomeDeputado: String,
   siglaPartido: String,
+  nomePartido: String,
   siglaUf: String,
   idLegislatura: Number,
   urlFoto: String,
