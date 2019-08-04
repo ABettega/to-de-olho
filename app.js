@@ -57,13 +57,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-const authRoutes = require('./routes/auth');
-app.use('/auth/', authRoutes);
-
-const deputadoRoutes = require('./routes/deputados');
-app.use('/deputado/', deputadoRoutes);
-
-const index = require('./routes/index');
-app.use('/', index);
+app.use('/deputados/propostas/', require('./routes/deputados/propostas'));
+app.use('/deputados/sessoes/', require('./routes/deputados/sessoes'));
+app.use('/deputados/', require('./routes/deputados/deputados'));
+app.use('/auth/', require('./routes/auth'));
+app.use('/', require('./routes/index'));
 
 module.exports = app;
