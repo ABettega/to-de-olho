@@ -51,11 +51,15 @@ app.locals.title = 'Nitido!';
 app.use(session({
   secret: "rest-api-nitido",
   resave: true,
-  saveUninitialized: true
+  saveUninitialized: true,
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
+app.use(express.static(path.join(__dirname, 'public')));
 
 const authRoutes = require('./routes/auth');
 app.use('/auth/', authRoutes);

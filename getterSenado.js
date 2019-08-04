@@ -1,6 +1,5 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const fetch = require('node-fetch');
 const axios = require('axios');
 const async = require('async');
 const SenadoVotacoesPorComissao = require('./models/SenadoVotacoesPorComissao');
@@ -9,16 +8,16 @@ const SenadoAtual = require('./models/SenadoAtual');
 const SenadoAfastado = require('./models/SenadoAfastado');
 const SenadoTodos = require('./models/SenadoTodos');
 
-// mongoose
-//   .connect(process.env.MONGODB_URI, {
-//     useNewUrlParser: true,
-//   })
-//   .then((x) => {
-//     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`);
-//   })
-//   .catch((err) => {
-//     console.error('Error connecting to mongo', err);
-//   });
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+  })
+  .then((x) => {
+    console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`);
+  })
+  .catch((err) => {
+    console.error('Error connecting to mongo', err);
+  });
 
 // Por Comissão
 const baseUrlComissoes = 'http://legis.senado.leg.br/dadosabertos/votacaoComissao/comissao/';
@@ -98,7 +97,7 @@ const comissoes = [
 //       SenadoAtual.create(
 //         el,
 //       );
-//       console.log(el)
+//       console.log(el);
 //     });
 //   })
 //   .catch(e => console.log(e));
@@ -148,34 +147,34 @@ const arrParlamentares = [];
 const arrFunc = [];
 const promiseArr = [];
 
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-  })
-  .then((x) => {
-    console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`);
-    for (let i = 1; i <= 30000; i += 1) {
-      arrFunc.push(() => {
-        axios.get(`http://legis.senado.leg.br/dadosabertos/senador/${i}/historico`, { headers: { Accept: 'application/json, text/plain, */*' } })
-          .then((res) => {
-            console.log(`entrou na funcao ${i}`)
-            if (res.data.DetalheParlamentar.Parlamentar !== undefined) {
-              SenadoTodos.create(
-                res.data.DetalheParlamentar.Parlamentar,
-              );
-            }
-            // console.log(res.data.DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.NomeParlamentar, i)
-          })
-          .catch((e) => {
-            // console.log('erro', i);
-          });
-      });
-      console.log(`adicionou funcao ${i}`);
-    }
+// mongoose
+//   .connect(process.env.MONGODB_URI, {
+//     useNewUrlParser: true,
+//   })
+//   .then((x) => {
+//     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`);
+//     for (let i = 1; i <= 30000; i += 1) {
+//       arrFunc.push(() => {
+//         axios.get(`http://legis.senado.leg.br/dadosabertos/senador/${i}/historico`, { headers: { Accept: 'application/json, text/plain, */*' } })
+//           .then((res) => {
+//             console.log(`entrou na funcao ${i}`)
+//             if (res.data.DetalheParlamentar.Parlamentar !== undefined) {
+//               SenadoTodos.create(
+//                 res.data.DetalheParlamentar.Parlamentar,
+//               );
+//             }
+//             // console.log(res.data.DetalheParlamentar.Parlamentar.IdentificacaoParlamentar.NomeParlamentar, i)
+//           })
+//           .catch((e) => {
+//             // console.log('erro', i);
+//           });
+//       });
+//       console.log(`adicionou funcao ${i}`);
+//     }
 
-    async.parallel(arrFunc, () => console.log('terminou arrFunc'))
-  })
-  .catch((err) => {
-    console.error('Error connecting to mongo', err);
-  });
+//     async.parallel(arrFunc, () => console.log('terminou arrFunc'))
+//   })
+//   .catch((err) => {
+//     console.error('Error connecting to mongo', err);
+//   });
 
