@@ -9,6 +9,8 @@ const deputadoSchema = new Schema({
   idLegislatura: Number,
   urlFoto: String,
   email: String,
+}, {
+  timestamps: true
 });
 
 const Deputado = mongoose.model("Deputado", deputadoSchema);
