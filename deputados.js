@@ -14,39 +14,28 @@ mongoose
     console.error('Error connecting to mongo', err);
   });
 
-// Por Comissão
-const baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/deputados?idLegislatura=51';
 
-const arrDeputados = [];
+// // Por Comissão
+// const baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/deputados?idLegislatura=56';
 
-axios.get(`${baseUrl}`, { headers: { Accept: 'application/json' } })
-  .then((res) => {
-    res.data.dados.forEach(dep => {
-      arrDeputados.push(dep);
-      Deputado.create({
-        id: dep.id,
-        nomeDeputado: dep.nome,
-        siglaPartido: dep.siglaPartido,
-        siglaUf: dep.siglaUf,
-        idLegislatura: dep.idLegislatura,
-        urlFoto: dep.urlFoto,
-        email: dep.email
-      })
-        .then(() => console.log('deu certo para', dep.nome))
-        .catch(e => console.log(e))
-    })
-  console.log(arrDeputados.length)
-  })
-  .catch((e) => {
-    console.log(e);
-});
+// const arrDeputados = [];
 
-/*
-  id: {type: Number, unique: true},
-  nomeDeputado: String,
-  siglaPartido: String,
-  siglaUf: String,
-  idLegislatura: Number,
-  urlFoto: String,
-  email: String,
-  */
+// axios.get(`${baseUrl}`, { headers: { Accept: 'application/json' } })
+//   .then((res) => {
+//     res.data.dados.forEach(dep => {
+//       Deputado.findOneAndUpdate({id: dep.id}, {
+//         id: dep.id,
+//         nomeDeputado: dep.nome,
+//         siglaPartido: dep.siglaPartido,
+//         siglaUf: dep.siglaUf,
+//         $push: {idLegislatura: dep.idLegislatura},
+//         urlFoto: dep.urlFoto,
+//         email: dep.email,
+//       }, {new: true, upsert: true})
+//       .then(() => console.log(dep.nome))
+//       .catch(e => console.log(e));
+//     })
+//   })
+//   .catch((e) => {
+//     console.log(e);
+// });
