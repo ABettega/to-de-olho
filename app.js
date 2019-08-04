@@ -11,7 +11,6 @@ const passport = require('./config/passport')
 const session = require('express-session');
 const cors = require('cors');
 
-
 mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
@@ -66,10 +65,10 @@ app.use(cors({
   origin: ['http://localhost:3000']
 }));
 
-const authRoutes = require('./routes/auth');
-app.use('/auth/', authRoutes);
-
-const index = require('./routes/index');
-app.use('/', index);
+app.use('/deputados/propostas/', require('./routes/deputados/propostas'));
+app.use('/deputados/sessoes/', require('./routes/deputados/sessoes'));
+app.use('/deputados/', require('./routes/deputados/deputados'));
+app.use('/auth/', require('./routes/auth'));
+app.use('/', require('./routes/index'));
 
 module.exports = app;
