@@ -9,6 +9,8 @@ const logger = require('morgan');
 const path = require('path');
 const passport = require('./config/passport')
 const session = require('express-session');
+const cors = require('cors');
+
 
 mongoose
   .connect(process.env.MONGODB_URI, {
@@ -58,6 +60,11 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(cors({
+  credentials: true,
+  origin: ['http://localhost:3000']
+}));
 
 const authRoutes = require('./routes/auth');
 app.use('/auth/', authRoutes);

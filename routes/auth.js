@@ -3,58 +3,74 @@ const router  = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const passport = require('../config/passport');
+// var app = express();
+// app.use(function(req, res, next) {
+//  res.header("Access-Control-Allow-Origin", "*");
+//  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//  next();
+// });
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', 
-    {badRequestMessage: 'Você deve preencher o nome do usuário e a senha!'}, 
-    (err, user, failureMessage) => {
+    {badRequestMessage: 'Você deve preencher o e-mail e a senha!'}, 
+    (err, email, failureMessage) => {
       if (err) {
         res.status(500).json({message: 'Algo deu errado!'})
         return;
       }
 
-      if (!user) {
+      if (!email) {
         res.status(401).json(failureMessage);
         return;
       }
 
-      req.login(user, (err) => {
+      req.login(email, (err) => {
         if (err) {
           res.status(500).json({message: 'Erro na sessão!'});
           return;
         }
-        res.status(200).json(user);
+        res.status(200).json(email);
       })
     })(req, res, next);
 });
 
 router.post('/signup', (req, res, next) => {
-  const {username, password, email} = req.body;
 
-  if (username === '' || username === undefined) {
-    res.status(400).json({message: 'É obrigatório inserir o nome de usuário!'});
-    return;
+  const {firstName, lastName, password, email, gender, day, month, year } = req.body;
+  
+  if (firstName === '' || firstName === undefined) {
+    return res.status(401).json({type: 'error', message: 'É obrigatório inserir o nome de usuário!'});
   }
 
   if (email === '' || email === undefined) {
-    res.status(400).json({message: 'É obrigatório inserir o email!'});
+    res.status(401).json({message: 'É obrigatório inserir o email!'});
     return;
   }
 
   if (password === '' || password === undefined) {
-    res.status(400).json({message: 'É obrigatório inserir a senha!'});
+    res.status(401).json({message: 'É obrigatório inserir a senha!'});
+    return;
+  }
+
+  if (day === '' || month === '' || year === '' ) {
+    res.status(401).json({message: 'É obrigatório inserir data de Nascimento'});
     return;
   }
 
   const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 
-  User.find({username: {$eq: username}})
+  User.find({email: {$eq: email}})
     .then(user => {
       if (user[0] === undefined) {
         User.create(new User({
-          username,
+          firstName,
+          lastName,
           password: hash,
           email,
+          gender,
+          day,
+          month,
+          year
         }))
           .then(user => res.status(200).json({message: 'Usuário criado com sucesso!', user}))
           .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!', err}));
@@ -63,7 +79,6 @@ router.post('/signup', (req, res, next) => {
       }
     })
     .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!!!', err}))
-
 });
 
 router.post('/edit', (req, res, next) => {
