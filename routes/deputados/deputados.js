@@ -2,6 +2,14 @@ const express = require('express');
 const router  = express.Router();
 const Deputado = require('../../models/Deputado')
 
+router.get('/atuais', (req, res, next) => {
+  Deputado.find({idLegislatura: {$in: 56}})
+    .then(deps => {
+      res.status(200).json(deps)
+    })
+    .catch(e => console.log(e))  
+});
+
 // Pegar todas as propostas de um autor
 router.get('/:idDeputado', (req, res, next) => {
   let {idDeputado} = req.params;
@@ -16,7 +24,6 @@ router.get('/:idDeputado', (req, res, next) => {
 router.get('/', (req, res, next) => {
   Deputado.find()
     .then(deps => {
-      console.log(deps)
       res.status(200).json(deps)
     })
     .catch(e => console.log(e))  
