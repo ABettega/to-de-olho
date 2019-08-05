@@ -15,7 +15,7 @@ const sessaoSchema = new Schema({
     proposicao: String,
     modo: String,
     votos: [{
-      deputado: String,
+      deputado: {type: String, uppercase: true},
       voto: String,
     }],
   }],
