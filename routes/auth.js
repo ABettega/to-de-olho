@@ -11,25 +11,23 @@ const passport = require('../config/passport');
 // });
 
 router.post('/login', (req, res, next) => {
-  passport.authenticate('local', 
-    {badRequestMessage: 'Você deve preencher o e-mail e a senha!'}, 
-    (err, email, failureMessage) => {
+  passport.authenticate('local', (err, user, failureMessage) => {
       if (err) {
         res.status(500).json({message: 'Algo deu errado!'})
         return;
       }
 
-      if (!email) {
+      if (!user) {
         res.status(401).json(failureMessage);
         return;
       }
 
-      req.login(email, (err) => {
+      req.login(user, (err) => {
         if (err) {
           res.status(500).json({message: 'Erro na sessão!'});
           return;
         }
-        res.status(200).json(email);
+        res.status(200).json(user);
       })
     })(req, res, next);
 });
@@ -37,23 +35,24 @@ router.post('/login', (req, res, next) => {
 router.post('/signup', (req, res, next) => {
 
   const {firstName, lastName, password, email, gender, day, month, year } = req.body;
-  
+
+
   if (firstName === '' || firstName === undefined) {
-    return res.status(401).json({type: 'error', message: 'É obrigatório inserir o nome de usuário!'});
+    return res.status(200).json({type: 'error', message: 'É obrigatório inserir o nome de usuário!'});
   }
 
   if (email === '' || email === undefined) {
-    res.status(401).json({message: 'É obrigatório inserir o email!'});
+    res.status(200).json({message: 'É obrigatório inserir o email!'});
     return;
   }
 
   if (password === '' || password === undefined) {
-    res.status(401).json({message: 'É obrigatório inserir a senha!'});
+    res.status(200).json({message: 'É obrigatório inserir a senha!'});
     return;
   }
 
   if (day === '' || month === '' || year === '' ) {
-    res.status(401).json({message: 'É obrigatório inserir data de Nascimento'});
+    res.status(200).json({message: 'É obrigatório inserir data de Nascimento'});
     return;
   }
 
@@ -72,10 +71,10 @@ router.post('/signup', (req, res, next) => {
           month,
           year
         }))
-          .then(user => res.status(200).json({message: 'Usuário criado com sucesso!', user}))
+          .then(user => res.status(201).json({message: 'Usuário criado com sucesso!', user}))
           .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!', err}));
       } else {
-        res.status(400).json({message: 'Este nome de usuário já existe no banco de dados!'});
+        res.status(200).json({message: 'Este nome de usuário já existe no banco de dados!'});
       }
     })
     .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!!!', err}))
