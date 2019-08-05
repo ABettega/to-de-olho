@@ -3,10 +3,8 @@ const Schema = mongoose.Schema;
 
 const sessaoSchema = new Schema({
   nomeDaSessao: String,
-  dataInicio: String,
-  horaInicio: String,
-  dataFim: String,
-  horaFim: String,
+  dataInicio: Date,
+  dataFim: Date,
   listaDePresenca: [String],
   votacoes: [{
     documento: {
