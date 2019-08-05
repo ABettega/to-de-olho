@@ -2,12 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const passport = require('../config/passport');
-// var app = express();
-// app.use(function(req, res, next) {
-//  res.header("Access-Control-Allow-Origin", "*");
-//  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//  next();
-// });
+const transport = require('../config/nodemailer');
 
 const router = express.Router();
 
@@ -34,12 +29,10 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/signup', (req, res, next) => {
-
   const {firstName, lastName, password, email, gender, day, month, year } = req.body;
 
-
-  if (firstName === '' || firstName === undefined) {
-    return res.status(200).json({type: 'error', message: 'É obrigatório inserir o nome de usuário!'});
+  if (firstName === '' || firstName === undefined || lastName === '' || lastName === undefined) {
+    return res.status(200).json({message: 'É obrigatório inserir o nome completo!'});
   }
 
   if (email === '' || email === undefined) {
@@ -52,8 +45,13 @@ router.post('/signup', (req, res, next) => {
     return;
   }
 
+  if (gender === '' || gender === undefined) {
+    res.status(200).json({message: 'É obrigatório inserir o gênero!'});
+    return;
+  }
+
   if (day === '' || month === '' || year === '' ) {
-    res.status(200).json({message: 'É obrigatório inserir data de Nascimento'});
+    res.status(200).json({message: 'É obrigatório inserir data de nascimento'});
     return;
   }
 
@@ -70,9 +68,19 @@ router.post('/signup', (req, res, next) => {
           gender,
           day,
           month,
-          year
+          year,
+          validated: false
         }))
-          .then(user => res.status(201).json({message: 'Usuário criado com sucesso!', user}))
+          .then(user => {
+            transport.sendMail({
+              from: '"Tô de Olho!" <detetive@todeolho.ironhackers.tech>',
+              to: email, 
+              subject: 'Email de Registro',
+              text: 'Clique aqui para registrar',
+              html: `Clica aqui irmão ${process.env.url}${email}`
+            })
+            res.status(201).json({message: 'Usuário criado com sucesso!', user})
+          })
           .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!', err}));
       } else {
         res.status(200).json({message: 'Este nome de usuário já existe no banco de dados!'});
@@ -91,6 +99,14 @@ router.post('/edit', (req, res, next) => {
     console.log('aqui')
     res.status(401).json({message: 'Você não está logado!'});
   }
+});
+
+router.get('/verify/:email', (req, res, next) => {
+  let { email } = req.params;
+
+  User.findOneAndUpdate({email}, {$set: { validated: true }})
+    .then(u => res.status(200).json(u))
+    .catch(e => res.status(400).json(e))
 });
 
 router.get('/logout', (req, res, next) => {
