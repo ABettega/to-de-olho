@@ -15,27 +15,27 @@ mongoose
   });
 
 
-// // Por Comissão
-// const baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/deputados?idLegislatura=56';
+// Por Comissão
+const baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/deputados?idLegislatura=56';
 
-// const arrDeputados = [];
+const arrDeputados = [];
 
-// axios.get(`${baseUrl}`, { headers: { Accept: 'application/json' } })
-//   .then((res) => {
-//     res.data.dados.forEach(dep => {
-//       Deputado.findOneAndUpdate({id: dep.id}, {
-//         id: dep.id,
-//         nomeDeputado: dep.nome,
-//         siglaPartido: dep.siglaPartido,
-//         siglaUf: dep.siglaUf,
-//         $push: {idLegislatura: dep.idLegislatura},
-//         urlFoto: dep.urlFoto,
-//         email: dep.email,
-//       }, {new: true, upsert: true})
-//       .then(() => console.log(dep.nome))
-//       .catch(e => console.log(e));
-//     })
-//   })
-//   .catch((e) => {
-//     console.log(e);
-// });
+axios.get(`${baseUrl}`, { headers: { Accept: 'application/json' } })
+  .then((res) => {
+    res.data.dados.forEach(dep => {
+      Deputado.findOneAndUpdate({id: dep.id}, {
+        id: dep.id,
+        nomeDeputado: dep.nome,
+        siglaPartido: dep.siglaPartido,
+        siglaUf: dep.siglaUf,
+        $push: {idLegislatura: dep.idLegislatura},
+        urlFoto: dep.urlFoto,
+        email: dep.email,
+      }, {new: true, upsert: true})
+      .then(() => console.log(dep.nome))
+      .catch(e => console.log(e));
+    })
+  })
+  .catch((e) => {
+    console.log(e);
+});

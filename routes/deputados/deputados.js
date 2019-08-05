@@ -16,7 +16,7 @@ router.get('/:idDeputado', (req, res, next) => {
 router.get('/', (req, res, next) => {
   Deputado.find()
     .then(deps => {
-      console.log(deps.length)
+      console.log(deps)
       res.status(200).json(deps)
     })
     .catch(e => console.log(e))  
