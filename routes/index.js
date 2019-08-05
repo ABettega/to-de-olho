@@ -7,10 +7,16 @@ const SenadoAfastado = require('../models/SenadoAfastado');
 const SenadoTodos = require('../models/SenadoTodos');
 const VotosPorSenador = require('../models/VotosPorSenador');
 const SenadoComissoesPorSenador = require('../models/SenadoComissoesPorSenador');
+const axios = require('axios').create({});
 
 /* GET home page */
-router.get('/', (req, res, next) => {
-  res.render('index');
+router.get('/api/fill', (req, res, next) => {
+  let parseString = parser.parseString;
+  axios.get('http://legis.senado.leg.br/dadosabertos/senador/lista/atual')
+    .then(result => {
+      res.status(200).json(result.data.ListaParlamentarEmExercicio)
+    })
+    .catch(err => res.status(400).json(err));
 });
 
 router.get('/senadores', (req, res) => {

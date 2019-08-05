@@ -12,7 +12,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   // always log the error
-  console.error('ERROR', req.method, req.path, err);
+  console.error('ERRO', req.method, req.path, err);
 
   // only render if the error ocurred before sending the response
   if (!res.headersSent) {
@@ -29,11 +29,11 @@ server.on('error', error => {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(`Port ${process.env.PORT} requires elevated privileges`);
+      console.error(`A porta ${process.env.PORT} requer privilégios elevados`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(`Port ${process.env.PORT} is already in use`);
+      console.error(`A porta ${process.env.PORT} já está em uso`);
       process.exit(1);
       break;
     default:
@@ -42,5 +42,5 @@ server.on('error', error => {
 });
 
 server.listen(process.env.PORT, () => {
-  console.log(`Listening on http://localhost:${process.env.PORT}`);
+  console.log(`Escutando em http://localhost:${process.env.PORT}`);
 });
