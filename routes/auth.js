@@ -1,7 +1,6 @@
 const express = require('express');
-const router  = express.Router();
-const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const User = require('../models/User');
 const passport = require('../config/passport');
 // var app = express();
 // app.use(function(req, res, next) {
@@ -9,6 +8,8 @@ const passport = require('../config/passport');
 //  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 //  next();
 // });
+
+const router = express.Router();
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, failureMessage) => {
