@@ -15,14 +15,34 @@ router.get('/', (req, res, next) => {
 
 router.get('/senadores', (req, res) => {
   SenadoAtual.find()
-    .then(senadores => res.status(200).json(senadores))
+    .then((senadores) => {
+      const {
+        NomeParlamentar,
+        CodigoParlamentar,
+        SiglaPartidoParlamentar,
+        UfParlamentar,
+        UrlFotoParlamentar,
+      } = senadores.map(senador => senador.IdentificacaoParlamentar);
+      const { PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato } = senadores.map(senador => senador.Mandato);
+      res.status(200).json({ NomeParlamentar, CodigoParlamentar, SiglaPartidoParlamentar, UfParlamentar, UrlFotoParlamentar, PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato });
+    })
     .catch(e => console.log(e));
 });
 
 router.get('/senadores/:id/atuais', (req, res) => {
   const { id } = req.params;
   SenadoAtual.find({ 'IdentificacaoParlamentar.CodigoParlamentar': id })
-    .then(senador => res.status(200).json(senador))
+    .then((senador) => {
+      const {
+        NomeParlamentar,
+        CodigoParlamentar,
+        SiglaPartidoParlamentar,
+        UfParlamentar,
+        UrlFotoParlamentar,
+      } = senador.map(sen => sen.IdentificacaoParlamentar);
+      const { PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato } = senador.map(sen => sen.Mandato);
+      res.status(200).json({ NomeParlamentar, CodigoParlamentar, SiglaPartidoParlamentar, UfParlamentar, UrlFotoParlamentar, PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato });
+    })
     .catch(e => console.log(e));
 });
 
