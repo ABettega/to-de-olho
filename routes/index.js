@@ -30,7 +30,8 @@ router.get('/senadores', (req, res) => {
         UrlFotoParlamentar,
       } = senadores.map(senador => senador.IdentificacaoParlamentar);
       const { PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato } = senadores.map(senador => senador.Mandato);
-      res.status(200).json({ NomeParlamentar, CodigoParlamentar, SiglaPartidoParlamentar, UfParlamentar, UrlFotoParlamentar, PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato });
+      const Mandatos = [PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato];
+      res.status(200).json({ NomeParlamentar, CodigoParlamentar, SiglaPartidoParlamentar, UfParlamentar, UrlFotoParlamentar, Mandatos });
     })
     .catch(e => console.log(e));
 });
@@ -47,7 +48,8 @@ router.get('/senadores/:id/atuais', (req, res) => {
         UrlFotoParlamentar,
       } = senador.map(sen => sen.IdentificacaoParlamentar);
       const { PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato } = senador.map(sen => sen.Mandato);
-      res.status(200).json({ NomeParlamentar, CodigoParlamentar, SiglaPartidoParlamentar, UfParlamentar, UrlFotoParlamentar, PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato });
+      const Mandatos = [PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato];
+      res.status(200).json({ NomeParlamentar, CodigoParlamentar, SiglaPartidoParlamentar, UfParlamentar, UrlFotoParlamentar, Mandatos });
     })
     .catch(e => console.log(e));
 });
