@@ -29,6 +29,4 @@ router.get('/', (req, res, next) => {
     .catch(e => console.log(e))  
 });
 
-
-
 module.exports = router;

@@ -15,10 +15,11 @@ passport.deserializeUser((id, cb) => {
 });
 
 passport.use(new LocalStrategy((username, password, next) => {
-  User.findOne({ username }, (err, user) => {
+  User.findOne({ email: username }, (err, user) => {
     if (err) {
       return next(err);
     }
+
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return next(null, false, { message: "Usuário ou senha incorretos!" });
     }

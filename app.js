@@ -54,7 +54,7 @@ app.locals.title = 'Nitido';
 app.use(session({
   secret: "rest-api-nitido",
   resave: true,
-  saveUninitialized: true
+  saveUninitialized: true,
 }));
 
 app.use(passport.initialize());
