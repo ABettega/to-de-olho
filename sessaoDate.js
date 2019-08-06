@@ -19,6 +19,7 @@ sessaoCamara.find({}, {dataInicio: 1, _id: 0})
 })
 .catch();
 
+// // Corrige a data do crawl de "dd/mm/aaaa" para IsoDate
 // db.sessoesdeps.find().forEach( function(sessao){
 //   const transformToDate = (date, hour) => {
 //     date = `${date.split('/')[2]}-${date.split('/')[1]}-${date.split('/')[0]}`;
@@ -35,4 +36,12 @@ sessaoCamara.find({}, {dataInicio: 1, _id: 0})
 //     horaFim: 1,
 //   }
 // })
+// });
+
+// // Tira o '(*)' que o crawl colocou nos deputados em algumas listas de presença
+// db.sessoesdeps.find().forEach(sessao => {
+//   const arr = [...sessao.listaDePresenca];
+//   db.sessoesdeps.update({_id: sessao._id}, {$set: {
+//     listaDePresenca: arr.map(dep => dep.replace(' (*)', ''))
+//   }});
 // });

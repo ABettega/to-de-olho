@@ -62,7 +62,6 @@ router.get('/:idDeputado', (req, res, next) => {
                     } else {
                       skip = false;
                     }
-
                     // Aggregate de presença/falta
                     sessoes.forEach(sessao => {
                       resultado.sessoes.total += 1;
@@ -96,7 +95,6 @@ router.get('/:idDeputado', (req, res, next) => {
                         });
                       }
                     });
-
                   })
                   .catch(e => console.log(e));
               }
@@ -116,7 +114,6 @@ router.get('/:idDeputado', (req, res, next) => {
 router.get('/', (req, res, next) => {
   Deputado.find()
     .then(deps => {
-      console.log(deps.length)
       res.status(200).json(deps)
     })
     .catch(e => console.log(e))
