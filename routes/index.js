@@ -7,6 +7,7 @@ const SenadoAfastado = require('../models/SenadoAfastado');
 const SenadoTodos = require('../models/SenadoTodos');
 const VotosPorSenador = require('../models/VotosPorSenador');
 const SenadoComissoesPorSenador = require('../models/SenadoComissoesPorSenador');
+const SenadoSessoes = require('../models/SenadoSessoes');
 const axios = require('axios').create({});
 
 /* GET home page */
@@ -106,7 +107,7 @@ router.get('/senadores/:id/comissoes/votos', (req, res) => {
   SenadoVotacoesPorComissao.find({ 'Votos.Voto': { $elemMatch: { CodigoParlamentar: id } } })
     .then(votos => res.status(200).json(votos))
     .catch(e => console.log(e));
-})
+});
 
 router.get('/senadores/historico', (req, res) => {
   SenadoTodos.find()
