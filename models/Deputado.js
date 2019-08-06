@@ -6,7 +6,7 @@ const deputadoSchema = new Schema({
   nomeDeputado: String,
   siglaPartido: String,
   siglaUf: String,
-  idLegislatura: Number,
+  idLegislatura: [Number],
   urlFoto: String,
   email: String,
 }, {

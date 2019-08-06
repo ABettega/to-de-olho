@@ -14,9 +14,8 @@ mongoose
     console.error('Error connecting to mongo', err);
   });
 
-
-// Por Comissão
-const baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/deputados?idLegislatura=56';
+// // Por Comissão
+// const baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/deputados?idLegislatura=56';
 
 const arrDeputados = [];
 
