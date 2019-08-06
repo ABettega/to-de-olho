@@ -1,3 +1,5 @@
+/* eslint-disable no-loop-func */
+/* eslint-disable no-await-in-loop */
 const express = require('express');
 const router  = express.Router();
 const SenadoVotacoesPorComissao = require('../models/SenadoVotacoesPorComissao');
@@ -106,6 +108,92 @@ router.get('/senadores/:id/comissoes/votos', (req, res) => {
   const { id } = req.params;
   SenadoVotacoesPorComissao.find({ 'Votos.Voto': { $elemMatch: { CodigoParlamentar: id } } })
     .then(votos => res.status(200).json(votos))
+    .catch(e => console.log(e));
+});
+
+router.get('/senadores/sessoes/:id', (req, res) => {
+  let { id } = req.params;
+  id = Number(id);
+  let nome = '';
+  const votoSenador = {
+    'P-NRV': 0,
+    'P-OD': 0,
+    REP: 0,
+    NCom: 0,
+    AP: 0,
+    LA: 0,
+    LAP: 0,
+    LC: 0,
+    LS: 0,
+    LG: 0,
+    NA: 0,
+    MIS: 0,
+    AUS: 0,
+    Sim: 0,
+    Não: 0,
+    Votou: 0,
+  };
+  let faltasSenador = 0;
+  let totalDeVotos = 0;
+  let presenca = '';
+  let votosRegistrados = '';
+  let uf = '';
+  let legislaturas = '';
+  let diasDeLicenca = 0;
+  let diasEmMissao = 0;
+  let diasEmAP = 0;
+  let obstrucoes = 0;
+  let naoVotou = 0;
+  let sigla = '';
+
+  const sum = (obj) => {
+    return Object.keys(obj).reduce((acc, key) => acc + parseFloat(obj[key] || 0), 0);
+  };
+
+  SenadoSessoes.find()
+    .then((sessoes) => {
+      sessoes.map((sessao) => {
+        return sessao.Votacao.map((vot) => {
+          return vot.Votos.VotoParlamentar.map((votPar) => {
+            if (votPar.CodigoParlamentar === id) {
+              nome = votPar.NomeParlamentar;
+              const voto = votPar.Voto.replace(' ', '');
+              if (votoSenador[voto]) {
+                votoSenador[voto] += 1;
+              } else {
+                votoSenador[voto] = 1;
+              }
+              sigla = votPar.SiglaPartido;
+              uf = votPar.SiglaUF;
+              faltasSenador = votoSenador.NCom;
+              totalDeVotos = sum(votoSenador) - (votoSenador.LA + votoSenador.LAP + votoSenador.LC + votoSenador.LS + votoSenador.LG + votoSenador.NCom + votoSenador['P-OD'] + votoSenador.AP);
+              diasDeLicenca = votoSenador.LA + votoSenador.LAP + votoSenador.LC + votoSenador.LS + votoSenador.LG;
+              diasEmMissao = votoSenador.MIS;
+              presenca = `${((1 - (faltasSenador / totalDeVotos)) * 100).toFixed(1)}% (${(totalDeVotos - faltasSenador)} / ${totalDeVotos})`;
+              votosRegistrados = `${((1 - (votoSenador['P-NRV'] / totalDeVotos)) * 100).toFixed(1)} %`;
+              diasEmAP = votoSenador.AP;
+              obstrucoes = votoSenador['P-OD'];
+              naoVotou = votoSenador['P-NRV'];
+            }
+          });
+        });
+      });
+      res.status(200).json({
+        nome,
+        sigla,
+        uf,
+        voto: votoSenador,
+        totalDeVotos,
+        faltasSenador,
+        votosRegistrados,
+        presenca,
+        diasDeLicenca,
+        diasEmMissao,
+        diasEmAP,
+        obstrucoes,
+        naoVotou,
+      });
+    })
     .catch(e => console.log(e));
 });
 
