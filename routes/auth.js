@@ -14,7 +14,7 @@ router.post('/login', (req, res, next) => {
       }
 
       if (!user) {
-        res.status(401).json(failureMessage);
+        res.status(200).json({error: true, errorMessage: failureMessage});
         return;
       }
 
@@ -32,26 +32,26 @@ router.post('/signup', (req, res, next) => {
   const {firstName, lastName, password, email, gender, day, month, year } = req.body;
 
   if (firstName === '' || firstName === undefined || lastName === '' || lastName === undefined) {
-    return res.status(200).json({message: 'É obrigatório inserir o nome completo!'});
+    return res.status(422).json({message: 'É obrigatório inserir o nome completo!'});
   }
 
   if (email === '' || email === undefined) {
-    res.status(200).json({message: 'É obrigatório inserir o email!'});
+    res.status(422).json({message: 'É obrigatório inserir o email!'});
     return;
   }
 
   if (password === '' || password === undefined) {
-    res.status(200).json({message: 'É obrigatório inserir a senha!'});
+    res.status(422).json({message: 'É obrigatório inserir a senha!'});
     return;
   }
 
   if (gender === '' || gender === undefined) {
-    res.status(200).json({message: 'É obrigatório inserir o gênero!'});
+    res.status(422).json({message: 'É obrigatório inserir o gênero!'});
     return;
   }
 
   if (day === '' || month === '' || year === '' ) {
-    res.status(200).json({message: 'É obrigatório inserir data de nascimento'});
+    res.status(422).json({message: 'É obrigatório inserir data de nascimento'});
     return;
   }
 
@@ -79,14 +79,15 @@ router.post('/signup', (req, res, next) => {
               text: 'Clique aqui para registrar',
               html: `Clica aqui irmão ${process.env.url}${email}`
             })
-            res.status(201).json({message: 'Usuário criado com sucesso!', user})
+              .then(() => res.status(201).json({error:false, message: 'Usuário criado com sucesso!', user}))
+              .catch(e => res.status(200).json({error: true, message: 'O email inserido é inválido!'}))
           })
-          .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!', err}));
+          .catch(err => res.status(400).json({error: true, message: 'Ocorreu um erro ao criar o usuário!', err}));
       } else {
-        res.status(200).json({message: 'Este nome de usuário já existe no banco de dados!'});
+        res.status(200).json({error: true, message: 'Este nome de usuário já existe no banco de dados!'});
       }
     })
-    .catch(err => res.status(400).json({message: 'Ocorreu um erro ao criar o usuário!!!', err}))
+    .catch(err => res.status(400).json({error: true, message: 'Ocorreu um erro ao criar o usuário!!!', err}))
 });
 
 router.post('/edit', (req, res, next) => {
@@ -96,7 +97,6 @@ router.post('/edit', (req, res, next) => {
       .then(user => res.status(200).json(user))
       .catch(err => res.status(400).json(err))
   } else {
-    console.log('aqui')
     res.status(401).json({message: 'Você não está logado!'});
   }
 });
