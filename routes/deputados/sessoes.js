@@ -7,11 +7,111 @@ const axios = require('axios').create({});
 const Deputado = require('../../models/Deputado');
 const SessaoCamara = require('../../models/SessaoCamara');
 
-const toCapitalized = str => str.toLowerCase().split(' ').map(a => a[0].toUpperCase() + a.slice(1)).join(' ');
+const toTitleCase = (str) => {
+  const arr = ['da', 'das', 'de', 'do', 'dos', 'e'];
+  return str.toLowerCase().split(' ').map(a => arr.includes(a) ? a : a[0].toUpperCase() + a.slice(1)).join(' ');
+}
 
-// Pegar todas as propostas de um autor
-router.get('/:idDeputado', (req, res, next) => {
-  const { idDeputado } = req.params;
+//Pegar a presença e votos da legislatura atual de um deputado
+router.get('/:idDeputado/atual', (req, res, next) => {
+  let { idDeputado } = req.params;
+  
+  Deputado.findOne({ id: idDeputado })
+  .then(dep => {
+      let baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/legislaturas?ordem=DESC&itens=1';
+
+      axios.get(baseUrl)
+        .then(legislaturas => {
+          // const legislaturas = {
+          //   data: {
+          //     dados: [{
+          //       id: 56,
+          //       dataInicio: '2019-01-01',
+          //       dataFim: '2022-12-31',
+          //     }],
+          //   }
+          // }
+          const legis = legislaturas.data.dados[0];
+          delete legis['uri'];
+          if(dep.idLegislatura.sort((a, b) => b - a)[0] !== legis.id) {
+            res.status(200).json({});
+          }
+
+          let resultado = {
+            nomeDeputado: dep.nomeDeputado,
+            uf: dep.siglaUf,
+            partido: dep.siglaPartido,
+            foto: dep.urlFoto,
+            legislatura: legis,
+            sessoes: {
+              total: 0,
+              presente: 0,
+              percentualPresenca: 0,
+            },
+            votos: {
+              sim: 0,
+              nao: 0,
+              obstrucao: 0,
+              art17: 0,
+              totalDeVotos: 0,
+              totalDeVotacoes: 0,
+              percentualDeVotos: 0,
+            }
+          };
+
+          SessaoCamara.find(
+            { dataInicio: { $gte: new Date(legis.dataInicio), $lte: new Date(legis.dataFim) } })
+            .then(sessoes => {
+              // Aggregate de presença/falta
+              sessoes.forEach(sessao => {
+                resultado.sessoes.total += 1;
+                if (sessao.listaDePresenca.includes(toTitleCase(dep.nomeDeputado))) {
+                  resultado.sessoes.presente += 1;
+                }
+
+                // Aggregate de Sim/Não/Obstrução/Art. 17
+                if (sessao.votacoes.length > 0) {
+                  sessao.votacoes.forEach(votacao => {
+                    resultado.votos.totalDeVotacoes += 1;
+                    votacao.votos.forEach(voto => {
+                      if (voto.deputado.toUpperCase() === dep.nomeDeputado.toUpperCase()) {
+                        switch (voto.voto) {
+                          case 'Sim':
+                            resultado.votos.sim += 1;
+                            break;
+                          case 'Não':
+                            resultado.votos.nao += 1;
+                            break;
+                          case 'Obstrução':
+                            resultado.votos.obstrucao += 1;
+                            break;
+                          case 'Art. 17':
+                            resultado.votos.art17 += 1;
+                            break;
+                          default:
+                            break;
+                        }
+                      }
+                    });
+                  });
+                }
+              });
+              const { sim, nao, art17 } = resultado.votos;
+              resultado.votos.totalDeVotos += sim + nao + art17;
+              resultado.sessoes.percentualPresenca = ((resultado.sessoes.presente / resultado.sessoes.total) * 100).toFixed(0) + '%';
+              resultado.votos.percentualDeVotos = ((resultado.votos.totalDeVotos / resultado.votos.totalDeVotacoes) * 100).toFixed(0) + '%';
+              res.status(200).json(resultado);
+            })
+            .catch(e => console.log(e));
+        })
+        .catch(e => console.log(e));
+    })
+    .catch(e => console.log(e));
+});
+
+// Pegar todo o histórico de presença e votos de um deputado
+router.get('/:idDeputado/historico', (req, res, next) => {
+  let { idDeputado } = req.params;
 
   Deputado.findOne({ id: idDeputado })
     .then((dep) => {
@@ -24,10 +124,25 @@ router.get('/:idDeputado', (req, res, next) => {
       });
 
       axios.get(baseUrl)
-        .then((legislaturas) => {
-          legislaturas.data.dados.forEach((legis) => {
-            delete legis.uri;
-          });
+
+        .then(legislaturas => {
+          // const legislaturas = {
+          //   data: {
+          //     dados: [{
+          //       id: 56,
+          //       dataInicio: '2019-01-01',
+          //       dataFim: '2022-12-31',
+          //     }, {
+          //       id: 55,
+          //       dataInicio: '2015-01-01',
+          //       dataFim: '2018-12-31',
+          //     }
+          //   ],
+          //   }
+          // }
+          legislaturas.data.dados.forEach(legis => {
+            delete legis['uri'];
+          })
 
           const resultado = {
             nomeDeputado: dep.nomeDeputado,
@@ -42,9 +157,11 @@ router.get('/:idDeputado', (req, res, next) => {
               nao: 0,
               obstrucao: 0,
               art17: 0,
-              total: 0,
-              percentualSobrePresenca: 0,
-            },
+
+              totalDeVotos: 0,
+              totalDeVotacoes: 0,
+              percentualDeVotos: 0,
+            }
           };
 
           const limit = 1000;
@@ -67,14 +184,16 @@ router.get('/:idDeputado', (req, res, next) => {
                     // Aggregate de presença/falta
                     sessoes.forEach((sessao) => {
                       resultado.sessoes.total += 1;
-                      if (sessao.listaDePresenca.includes(toCapitalized(dep.nomeDeputado))) {
+                      if (sessao.listaDePresenca.includes(toTitleCase(dep.nomeDeputado))) {
                         resultado.sessoes.presente += 1;
                       }
 
                       // Aggregate de Sim/Não/Obstrução/Art. 17
                       if (sessao.votacoes.length > 0) {
-                        sessao.votacoes.forEach((votacao) => {
-                          votacao.votos.forEach((voto) => {
+
+                        sessao.votacoes.forEach(votacao => {
+                          resultado.votos.totalDeVotacoes += 1;
+                          votacao.votos.forEach(voto => {
                             if (voto.deputado.toUpperCase() === dep.nomeDeputado.toUpperCase()) {
                               switch (voto.voto) {
                                 case 'Sim':
@@ -101,12 +220,11 @@ router.get('/:idDeputado', (req, res, next) => {
                   .catch(e => console.log(e));
               }
             }
-            const {
- sim, nao, obstrucao, art17 
-} = resultado.votos;
-            resultado.votos.total += sim + nao + obstrucao + art17;
-            resultado.sessoes.percentualPresenca = `${((resultado.sessoes.presente / resultado.sessoes.total) * 100).toFixed(0)  }%`;
-            resultado.votos.percentualSobrePresenca = `${((resultado.votos.total / resultado.sessoes.presente) * 100).toFixed(0)  }%`;
+
+            const { sim, nao, art17 } = resultado.votos;
+            resultado.votos.totalDeVotos += sim + nao + art17;
+            resultado.sessoes.percentualPresenca = ((resultado.sessoes.presente / resultado.sessoes.total) * 100).toFixed(0) + '%';
+            resultado.votos.percentualDeVotos = ((resultado.votos.totalDeVotos / resultado.votos.totalDeVotacoes) * 100).toFixed(0) + '%';
             await res.status(200).json(resultado);
           })();
         })
