@@ -138,13 +138,13 @@ router.get('/senadores/sessoes/:id', (req, res) => {
   let presenca = '';
   let votosRegistrados = '';
   let uf = '';
-  let legislaturas = '';
   let diasDeLicenca = 0;
   let diasEmMissao = 0;
   let diasEmAP = 0;
   let obstrucoes = 0;
   let naoVotou = 0;
   let sigla = '';
+  let UrlFotoParlamentar = '';
   const mandatos = {
     dataInicio: [],
     dataFim: [],
@@ -171,6 +171,7 @@ router.get('/senadores/sessoes/:id', (req, res) => {
               sigla = votPar.SiglaPartido;
               uf = votPar.SiglaUF;
               faltasSenador = votoSenador.NCom;
+              UrlFotoParlamentar = votPar.Foto;
               totalDeVotos = sum(votoSenador) - (votoSenador.LA + votoSenador.LAP + votoSenador.LC + votoSenador.LS + votoSenador.LG + votoSenador.NCom + votoSenador['P-OD'] + votoSenador.AP);
               diasDeLicenca = votoSenador.LA + votoSenador.LAP + votoSenador.LC + votoSenador.LS + votoSenador.LG;
               diasEmMissao = votoSenador.MIS;
@@ -224,6 +225,7 @@ router.get('/senadores/sessoes/:id', (req, res) => {
         obstrucoes,
         naoVotou,
         mandatos,
+        UrlFotoParlamentar,
       });
     })
     .catch(e => console.log(e));
