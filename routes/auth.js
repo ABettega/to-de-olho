@@ -71,7 +71,7 @@ router.post('/signup', (req, res, next) => {
           year,
           validated: false
         }))
-          .then(user => {
+          .then(newUser => {
             transport.sendMail({
               from: '"Tô de Olho!" <detetive@todeolho.ironhackers.tech>',
               to: email, 
@@ -79,7 +79,15 @@ router.post('/signup', (req, res, next) => {
               text: `Siga esse link para se registrar: ${process.env.MAIL_CONFIRMATION_URL}${email}`,
               html: `Clica aqui irmão ${process.env.MAIL_CONFIRMATION_URL}${email}`,
             })
-              .then(() => res.status(201).json({error:false, message: 'Usuário criado com sucesso!', user}))
+              .then(() => {
+                req.login(newUser, (err) => {
+                  if (err) {
+                    res.status(200).json({message: 'Erro na sessão!'});
+                    return;
+                  }
+                  res.status(200).json({message: 'Usuário criado com sucesso'})
+                  })
+              })
               .catch(e => res.status(200).json({error: true, message: 'O email inserido é inválido!'}))
           })
           .catch(err => res.status(400).json({error: true, message: 'Ocorreu um erro ao criar o usuário!', err}));
