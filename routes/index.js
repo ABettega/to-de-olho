@@ -135,8 +135,8 @@ router.get('/senadores/sessoes/:id', (req, res) => {
   };
   let faltasSenador = 0;
   let totalDeVotos = 0;
-  let presenca = '';
-  let votosRegistrados = '';
+  let presencaPorcentagem = 0;
+  let votosRegistrados = 0;
   let uf = '';
   let diasDeLicenca = 0;
   let diasEmMissao = 0;
@@ -175,8 +175,8 @@ router.get('/senadores/sessoes/:id', (req, res) => {
               totalDeVotos = sum(votoSenador) - (votoSenador.LA + votoSenador.LAP + votoSenador.LC + votoSenador.LS + votoSenador.LG + votoSenador.NCom + votoSenador['P-OD'] + votoSenador.AP);
               diasDeLicenca = votoSenador.LA + votoSenador.LAP + votoSenador.LC + votoSenador.LS + votoSenador.LG;
               diasEmMissao = votoSenador.MIS;
-              presenca = `${((1 - (faltasSenador / totalDeVotos)) * 100).toFixed(1)}% (${(totalDeVotos - faltasSenador)} / ${totalDeVotos})`;
-              votosRegistrados = `${((1 - (votoSenador['P-NRV'] / totalDeVotos)) * 100).toFixed(1)} %`;
+              presencaPorcentagem = ((1 - (faltasSenador / totalDeVotos)) * 100).toFixed(0);
+              votosRegistrados = ((1 - (votoSenador['P-NRV'] / totalDeVotos)) * 100).toFixed(0);
               diasEmAP = votoSenador.AP;
               obstrucoes = votoSenador['P-OD'];
               naoVotou = votoSenador['P-NRV'];
@@ -218,7 +218,7 @@ router.get('/senadores/sessoes/:id', (req, res) => {
         totalDeVotos,
         faltasSenador,
         votosRegistrados,
-        presenca,
+        presencaPorcentagem,
         diasDeLicenca,
         diasEmMissao,
         diasEmAP,
