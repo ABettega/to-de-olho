@@ -145,12 +145,17 @@ router.get('/senadores/sessoes/:id', (req, res) => {
   let obstrucoes = 0;
   let naoVotou = 0;
   let sigla = '';
+  const mandatos = {
+    dataInicio: [],
+    dataFim: [],
+    tipoCausaFimExercicio: [],
+  };
 
   const sum = (obj) => {
     return Object.keys(obj).reduce((acc, key) => acc + parseFloat(obj[key] || 0), 0);
   };
 
-  SenadoSessoes.find()
+  const getDados = SenadoSessoes.find()
     .then((sessoes) => {
       sessoes.map((sessao) => {
         return sessao.Votacao.map((vot) => {
@@ -178,6 +183,32 @@ router.get('/senadores/sessoes/:id', (req, res) => {
           });
         });
       });
+    })
+    .catch(e => console.log(e));
+
+  // Pega mandatos
+  const getMandatos = axios.get(`http://legis.senado.leg.br/dadosabertos/parlamentar/${id}`)
+    .then((response) => {
+      if (response.data.parlamentar.exercicios.exercicio.length === undefined) {
+        mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.dataInicio;
+        mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.dataFim;
+        mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.tipoCausaFimExercicio;
+      } else {
+        response.data.parlamentar.exercicios.exercicio.forEach((ex) => {
+        // eslint-disable-next-line no-restricted-syntax
+          for (let [key, value] of Object.entries(ex)) {
+            mandatos[key] += `${value} `;
+          }
+          mandatos.dataInicio = mandatos.dataInicio.split(/[\s,]/);
+          mandatos.dataFim = mandatos.dataFim.split(/[\s,]/);
+          mandatos.tipoCausaFimExercicio = mandatos.tipoCausaFimExercicio.split(/[\s,]/);
+        });
+      }
+    })
+    .catch(e => console.log(e));
+
+  Promise.all([getDados, getMandatos])
+    .then(() => {
       res.status(200).json({
         nome,
         sigla,
@@ -192,6 +223,7 @@ router.get('/senadores/sessoes/:id', (req, res) => {
         diasEmAP,
         obstrucoes,
         naoVotou,
+        mandatos,
       });
     })
     .catch(e => console.log(e));

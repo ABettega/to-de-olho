@@ -43,7 +43,7 @@ const senadoSessoesSchema = new Schema({
     },
   ],
 });
-
-const SenadoSessoes = mongoose.model('SenadoSessoe', senadoSessoesSchema);
+// Populando SessoesHistorico - para últimos 8 anos usar SenadoSessoe
+const SenadoSessoes = mongoose.model('SenadoSessoesHistorico', senadoSessoesSchema);
 
 module.exports = SenadoSessoes;
