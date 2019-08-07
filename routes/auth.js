@@ -76,8 +76,8 @@ router.post('/signup', (req, res, next) => {
               from: '"Tô de Olho!" <detetive@todeolho.ironhackers.tech>',
               to: email, 
               subject: 'Email de Registro',
-              text: 'Clique aqui para registrar',
-              html: `Clica aqui irmão ${process.env.MAIL_CONFIRMATION_URL}${email}`
+              text: `Siga esse link para se registrar: ${process.env.MAIL_CONFIRMATION_URL}${email}`,
+              html: `Clica aqui irmão ${process.env.MAIL_CONFIRMATION_URL}${email}`,
             })
               .then(() => {
                 req.login(newUser, (err) => {
