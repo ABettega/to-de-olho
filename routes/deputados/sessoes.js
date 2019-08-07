@@ -1,7 +1,10 @@
+/* eslint-disable no-loop-func */
+/* eslint-disable no-await-in-loop */
 const express = require('express');
+
 const router = express.Router();
 const axios = require('axios').create({});
-const Deputado = require('../../models/Deputado')
+const Deputado = require('../../models/Deputado');
 const SessaoCamara = require('../../models/SessaoCamara');
 
 const toTitleCase = (str) => {
@@ -111,8 +114,8 @@ router.get('/:idDeputado/historico', (req, res, next) => {
   let { idDeputado } = req.params;
 
   Deputado.findOne({ id: idDeputado })
-    .then(dep => {
-      let baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/legislaturas?ordem=ASC&ordenarPor=id&id='
+    .then((dep) => {
+      let baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/legislaturas?ordem=ASC&ordenarPor=id&id=';
       dep.idLegislatura.forEach((legis, idx) => {
         baseUrl += legis;
         if (idx < dep.idLegislatura.length - 1) {
@@ -121,6 +124,7 @@ router.get('/:idDeputado/historico', (req, res, next) => {
       });
 
       axios.get(baseUrl)
+
         .then(legislaturas => {
           // const legislaturas = {
           //   data: {
@@ -140,7 +144,7 @@ router.get('/:idDeputado/historico', (req, res, next) => {
             delete legis['uri'];
           })
 
-          let resultado = {
+          const resultado = {
             nomeDeputado: dep.nomeDeputado,
             legislaturas: legislaturas.data.dados,
             sessoes: {
@@ -153,6 +157,7 @@ router.get('/:idDeputado/historico', (req, res, next) => {
               nao: 0,
               obstrucao: 0,
               art17: 0,
+
               totalDeVotos: 0,
               totalDeVotacoes: 0,
               percentualDeVotos: 0,
@@ -168,15 +173,16 @@ router.get('/:idDeputado/historico', (req, res, next) => {
               while (skip !== false) {
                 await SessaoCamara.find(
                   { dataInicio: { $gte: new Date(legis[x].dataInicio), $lte: new Date(legis[x].dataFim) } }, {},
-                  { limit: limit, skip: limit * skip })
-                  .then(sessoes => {
+                  { limit, skip: limit * skip }
+)
+                  .then((sessoes) => {
                     if (sessoes.length > 0) {
                       skip += 1;
                     } else {
                       skip = false;
                     }
                     // Aggregate de presença/falta
-                    sessoes.forEach(sessao => {
+                    sessoes.forEach((sessao) => {
                       resultado.sessoes.total += 1;
                       if (sessao.listaDePresenca.includes(toTitleCase(dep.nomeDeputado))) {
                         resultado.sessoes.presente += 1;
@@ -184,6 +190,7 @@ router.get('/:idDeputado/historico', (req, res, next) => {
 
                       // Aggregate de Sim/Não/Obstrução/Art. 17
                       if (sessao.votacoes.length > 0) {
+
                         sessao.votacoes.forEach(votacao => {
                           resultado.votos.totalDeVotacoes += 1;
                           votacao.votos.forEach(voto => {
@@ -213,6 +220,7 @@ router.get('/:idDeputado/historico', (req, res, next) => {
                   .catch(e => console.log(e));
               }
             }
+
             const { sim, nao, art17 } = resultado.votos;
             resultado.votos.totalDeVotos += sim + nao + art17;
             resultado.sessoes.percentualPresenca = ((resultado.sessoes.presente / resultado.sessoes.total) * 100).toFixed(0) + '%';
@@ -227,10 +235,10 @@ router.get('/:idDeputado/historico', (req, res, next) => {
 
 router.get('/', (req, res, next) => {
   Deputado.find()
-    .then(deps => {
-      res.status(200).json(deps)
+    .then((deps) => {
+      res.status(200).json(deps);
     })
-    .catch(e => console.log(e))
+    .catch(e => console.log(e));
 });
 
 module.exports = router;
