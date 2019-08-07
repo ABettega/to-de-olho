@@ -5,27 +5,7 @@ const SenadoAtual = require('./models/SenadoAtual');
 const SenadoComissoesPorSenador = require('./models/SenadoComissoesPorSenador');
 
 async function getComissoesPorSenador() {
-  const codigosSenadores = [5352,
-    5012,
-    5411,
-    5988,
-    5942,
-    2331,
-    5322,
-    4560,
-    5525,
-    1173,
-    4531,
-    5959,
-    5929,
-    70,
-    5502,
-    5748,
-    5561,
-    677,
-    6005,
-    5783,
-    5236];
+  const codigosSenadores = [];
 
   await mongoose
     .connect(process.env.MONGODB_URI, {
