@@ -70,5 +70,6 @@ app.use('/deputados/sessoes/', require('./routes/deputados/sessoes'));
 app.use('/deputados/', require('./routes/deputados/deputados'));
 app.use('/auth/', require('./routes/auth'));
 app.use('/', require('./routes/index'));
+app.use('/my-politicians', require('./routes/user-actions'))
 
 module.exports = app;
