@@ -25,16 +25,7 @@ router.get('/api/fill', (req, res, next) => {
 router.get('/senadores', (req, res) => {
   SenadoAtual.find()
     .then((senadores) => {
-      const {
-        NomeParlamentar,
-        CodigoParlamentar,
-        SiglaPartidoParlamentar,
-        UfParlamentar,
-        UrlFotoParlamentar,
-      } = senadores.map(senador => senador.IdentificacaoParlamentar);
-      const { PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato } = senadores.map(senador => senador.Mandato);
-      const Mandatos = [PrimeiraLegislaturaDoMandato, SegundaLegislaturaDoMandato];
-      res.status(200).json({ NomeParlamentar, CodigoParlamentar, SiglaPartidoParlamentar, UfParlamentar, UrlFotoParlamentar, Mandatos });
+     res.status(200).json(senadores)
     })
     .catch(e => console.log(e));
 });
