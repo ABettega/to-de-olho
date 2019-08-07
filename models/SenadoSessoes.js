@@ -20,7 +20,7 @@ const senadoSessoesSchema = new Schema({
       Resultado: String,
       CodigoMateria: Number,
       SiglaMateria: String,
-      NumeroMateria: Number,
+      NumeroMateria: String,
       AnoMateria: Number,
       SiglaCasaMateria: String,
       DescricaoObjetivoProcesso: String,
@@ -44,6 +44,7 @@ const senadoSessoesSchema = new Schema({
   ],
 });
 // Populando SessoesHistorico - para últimos 8 anos usar SenadoSessoe
-const SenadoSessoes = mongoose.model('SenadoSessoesHistorico', senadoSessoesSchema);
+const SenadoSessoes = mongoose.model('SenadoSessoe', senadoSessoesSchema);
+const SenadoSessoesHistorico = mongoose.model('SenadoSessoesHistorico', senadoSessoesSchema);
 
-module.exports = SenadoSessoes;
+module.exports = { SenadoSessoes, SenadoSessoesHistorico };

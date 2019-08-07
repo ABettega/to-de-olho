@@ -9,7 +9,7 @@ const SenadoAfastado = require('../models/SenadoAfastado');
 const SenadoTodos = require('../models/SenadoTodos');
 const VotosPorSenador = require('../models/VotosPorSenador');
 const SenadoComissoesPorSenador = require('../models/SenadoComissoesPorSenador');
-const SenadoSessoes = require('../models/SenadoSessoes');
+const sessoes = require('../models/SenadoSessoes');
 const axios = require('axios').create({});
 
 /* GET home page */
@@ -155,7 +155,7 @@ router.get('/senadores/sessoes/:id', (req, res) => {
     return Object.keys(obj).reduce((acc, key) => acc + parseFloat(obj[key] || 0), 0);
   };
 
-  const getDados = SenadoSessoes.find()
+  const getDados = sessoes.SenadoSessoesHistorico.find()
     .then((sessoes) => {
       sessoes.map((sessao) => {
         return sessao.Votacao.map((vot) => {

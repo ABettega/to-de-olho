@@ -27,6 +27,9 @@ async function getVotacoesPlenario() {
     '20180101', '20180301', '20180501', '20180701', '20180901', '20181101', '20181231',
     '20190101', '20190301', '20190501', '20190701', '20190901'];
 
+  const erros = ['20011101', '20011231', '20080301', '20080501', '20081101', '20081231', '20090501', '20090701'];
+  const erros2 = [];
+
   await mongoose
     .connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
@@ -38,25 +41,31 @@ async function getVotacoesPlenario() {
       console.error('Error connecting to mongo', err);
     });
 
-  for (let i = 0; i < datas.length - 1; i += 1) {
-    axios.get(`http://legis.senado.leg.br/dadosabertos/plenario/lista/votacao/${datas[i]}/${datas[i + 1]}`, { headers: { 'Content-Type': 'application/json' } })
+  // for (let i = 0; i < datas.length - 1; i += 1) {
+  //   axios.get(`http://legis.senado.leg.br/dadosabertos/plenario/lista/votacao/${datas[i]}/${datas[i + 1]}`, { headers: { 'Content-Type': 'application/json' } })
+  //     .then((res) => {
+  //       SenadoSessoes.create(res.data.ListaVotacoes.Votacoes)
+  //         .then(sessao => console.log('registro criado!', datas[i], datas[i + 1]))
+  //         .catch(e => console.log(e));
+  //     })
+  //     .catch(e => {
+  //       erros.push(datas[i], datas[i + 1])
+  //       console.log('ERROS', erros)
+  //   });
+  // }
+
+  for (let i = 0; i < erros.length; i += 2) {
+    axios.get(`http://legis.senado.leg.br/dadosabertos/plenario/lista/votacao/${erros[i]}/${erros[i + 1]}`, { headers: { 'Content-Type': 'application/json' } })
       .then((res) => {
         SenadoSessoes.create(res.data.ListaVotacoes.Votacoes)
-          .then(sessao => console.log('registro criado!', datas[i], datas[i + 1]))
-          .catch(e => console.log('ERRO!', e));
+          .then(sessao => console.log('registro criado!', erros[i], erros[i + 1]))
+          .catch(e => console.log(e));
       })
-      .catch(e => console.log(e));
+      .catch((e) => {
+        erros2.push(datas[i], datas[i + 1]);
+        console.log('ERROS', erros2);
+      });
   }
-
-  // axios.get(`http://legis.senado.leg.br/dadosabertos/senador/5008/comissoes`, { headers: { 'Content-Type': 'application/json' } })
-  //   .then((res) => {
-  //     console.log(res.data);
-  //   })
-  //   .catch((e) => {
-  //     // idsSenadoresFalha.push(codigosSenadores[i]);
-  //     console.log(e);
-  //     // console.log('falhou pegar', idsSenadoresFalha);
-  //   });
 }
 
 getVotacoesPlenario();
