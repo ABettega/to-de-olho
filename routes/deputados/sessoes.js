@@ -1,5 +1,3 @@
-/* eslint-disable no-loop-func */
-/* eslint-disable no-await-in-loop */
 const express = require('express');
 
 const router = express.Router();
@@ -33,7 +31,7 @@ const checaVotos = (sessoes, nomeDeputado, situacao) => {
   const resultado = [];
 
   sessoes.forEach(sessao => {
-    const {_id, dataInicio, votacoes} = sessao;
+    const {dataInicio, votacoes} = sessao;
     if(votacoes.length > 0) {
       votacoes.forEach(votacao => {
         let flag = 0;
@@ -44,12 +42,12 @@ const checaVotos = (sessoes, nomeDeputado, situacao) => {
               case 'Não':
               case 'Art. 17':
                 if(situacao === 'votos') {
-                  resultado.push({_id, dataInicio, documento: votacao.documento, proposicao: votacao.proposicao});
+                  resultado.push({_id: votacao._id, dataInicio, documento: votacao.documento, proposicao: votacao.proposicao});
                 }
                 break;
               case 'Obstrução':
                 if(situacao === 'obstrucao') {
-                  resultado.push({_id, dataInicio, documento: votacao.documento, proposicao: votacao.proposicao});
+                  resultado.push({_id: votacao._id, dataInicio, documento: votacao.documento, proposicao: votacao.proposicao});
                 }
                 break;
               default:
@@ -60,7 +58,7 @@ const checaVotos = (sessoes, nomeDeputado, situacao) => {
           }
         });
         if (flag === votacao.votos.length && situacao === 'naovot') {
-          resultado.push({_id, dataInicio, documento: votacao.documento, proposicao: votacao.proposicao});
+          resultado.push({_id: votacao._id, dataInicio, documento: votacao.documento, proposicao: votacao.proposicao});
         }
       })
     }
@@ -213,6 +211,8 @@ router.get('/:idDeputado/historico', (req, res, next) => {
         }
       });
 
+      console.log(baseUrl);
+
       axios.get(baseUrl)
         .then(legislaturas => {
           // const legislaturas = {
@@ -256,7 +256,7 @@ router.get('/:idDeputado/historico', (req, res, next) => {
             }
           };
 
-          const limit = 1000;
+          const limit = 500;
           const legis = legislaturas.data.dados;
 
           (async () => {
@@ -264,9 +264,11 @@ router.get('/:idDeputado/historico', (req, res, next) => {
               let skip = 0;
               while (skip !== false) {
                 await SessaoCamara.find(
-                  { dataInicio: { $gte: new Date(legis[x].dataInicio), $lte: new Date(legis[x].dataFim) } }, {},
+                  { dataInicio: { $gte: new Date(legis[x].dataInicio), $lte: new Date(legis[x].dataFim) } }, 
+                  {},
                   { limit, skip: limit * skip })
                   .then((sessoes) => {
+                    console.log(sessoes.length);
                     if (sessoes.length > 0) {
                       skip += 1;
                     } else {
@@ -281,9 +283,8 @@ router.get('/:idDeputado/historico', (req, res, next) => {
 
                       // Aggregate de Sim/Não/Obstrução/Art. 17
                       if (sessao.votacoes.length > 0) {
-
-                        sessao.votacoes.forEach(votacao => {
-                          resultado.votos.totalDeVotacoes += 1;
+                          sessao.votacoes.forEach(votacao => {
+                            resultado.votos.totalDeVotacoes += 1;
                           votacao.votos.forEach(voto => {
                             if (voto.deputado.toUpperCase() === dep.nomeDeputado.toUpperCase()) {
                               switch (voto.voto) {
