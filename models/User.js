@@ -11,7 +11,9 @@ const userSchema = new Schema({
   day: {type: Number, required: true},
   month: {type: String, required: true},
   year: {type: Number, required: true},
-  validated: {type: Boolean, default: false}
+  validated: {type: Boolean, default: false},
+  depFavoritos: [{type: mongoose.Schema.Types.ObjectId, ref: 'Deputado'}],
+  senFavoritos: [{type: mongoose.Schema.Types.ObjectId, ref: 'SenadoTodos'}]
 });
 
 const User = mongoose.model('User', userSchema);
