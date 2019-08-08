@@ -4,21 +4,24 @@ const User = require('../models/User');
 const Deputado = require('../models/Deputado');
 const SenadoTodos = require('../models/SenadoTodos');
 
-router.get('/show', (req,res, next) => {
-  console.log(req);
-  const depArr = [];
-  const senArr = [];
-  
+router.get('/getFavorites', (req,res, next) => {
+  const { email } = req.user;
+  let depFavoritos = [];
+  let senFavoritos = [];
+  User.find({email: email})
+    .then(usr => {
+      depFavoritos = [...usr[0].depFavoritos];
+      senFavoritos = [...usr[0].senFavoritos];
+      res.status(200).json({depFavoritos, senFavoritos});
+    })
+    .catch(err => res.status(400).json(err))
 })
 
 router.post("/add-politician", (req,res,next) => {
-  console.log(req.user._id)
   const {id, politico} = req.body
-  console.log(id,politico)
   if(politico === "/deputado/"){
     User.findOneAndUpdate({_id: req.user._id}, {$push: {depFavoritos:id}},{new:true})
     .then(user => {
-      console.log(user)
       res.status(200).json(user)})
     .catch(err => res.status(400).json(err))
   } else{
