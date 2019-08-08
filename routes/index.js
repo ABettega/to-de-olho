@@ -82,8 +82,6 @@ router.get('/senadores/:id/comissoes', (req, res) => {
   SenadoComissoesPorSenador.find({ 'MembroComissaoParlamentar.Parlamentar.IdentificacaoParlamentar.CodigoParlamentar': id })
     .then(data => res.status(200).json({ data, comissoes }))
     .catch(e => console.log(e));
-    // campo de filtro pelas comissoes fixas (array comissoes) é
-    // MembroComissaoParlamentar.Parlamentar.MembroComissoes.Comissao[IdentificacaoComissao.SiglaComissao]
 });
 
 router.get('/senadores/:id/comissoes/votos', (req, res) => {
@@ -176,11 +174,9 @@ router.get('/senadores/:id/sessoes/', (req, res) => {
       if (response.data.parlamentar.exercicios.exercicio.length === undefined) {
         mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.dataInicio;
         mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.dataFim;
-        // mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.tipoCausaFimExercicio;
       } else {
         mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.map(ex => ex.dataInicio);
         mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.map(ex => ex.dataFim);
-        // mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.map(ex => ex.tipoCausaFimExercicio);
       }
     })
     .catch(e => console.log(e));
@@ -292,11 +288,9 @@ router.get('/senadores/historico/sessoes/:id', (req, res) => {
       if (response.data.parlamentar.exercicios.exercicio.length === undefined) {
         mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.dataInicio;
         mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.dataFim;
-        // mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.tipoCausaFimExercicio;
       } else {
         mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.map(ex => ex.dataInicio);
         mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.map(ex => ex.dataFim);
-        // mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.map(ex => ex.tipoCausaFimExercicio);
       }
     })
     .catch(e => console.log(e));
@@ -332,7 +326,14 @@ router.get('/senadores/historico', (req, res) => {
     .then((senadores) => {
       SenadoAtual.find()
         .then((senadoresAtuais) => {
-          const todosSenadores = senadores.concat(senadoresAtuais);
+          const historicos = senadores.map(sena => sena.IdentificacaoParlamentar.NomeCompletoParlamentar);
+          const filtrados = [];
+          senadoresAtuais.map((sen) => {
+            if (historicos.find(name => name === sen.IdentificacaoParlamentar.NomeCompletoParlamentar) === undefined) {
+              filtrados.push(sen);
+            }
+          });
+          const todosSenadores = senadores.concat(filtrados);
           res.status(200).json({ todosSenadores });
         })
         .catch(e => console.log(e));
