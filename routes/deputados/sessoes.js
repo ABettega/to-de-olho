@@ -50,6 +50,11 @@ const checaVotos = (sessoes, nomeDeputado, situacao) => {
                   resultado.push({_id: votacao._id, dataInicio, documento: votacao.documento, proposicao: votacao.proposicao});
                 }
                 break;
+              case 'Abstenção':
+                if(situacao === 'abstencao') {
+                  resultado.push({_id: votacao._id, dataInicio, documento: votacao.documento, proposicao: votacao.proposicao});
+                }
+                break;
               default:
                 break;
             }
@@ -140,6 +145,7 @@ router.get('/:idDeputado/atual', (req, res, next) => {
               sim: 0,
               nao: 0,
               obstrucao: 0,
+              abstencao: 0,
               art17: 0,
               totalDeVotos: 0,
               totalDeVotacoes: 0,
@@ -157,7 +163,7 @@ router.get('/:idDeputado/atual', (req, res, next) => {
                   resultado.sessoes.presente += 1;
                 }
 
-                // Aggregate de Sim/Não/Obstrução/Art. 17
+                // Aggregate de Sim/Não/Obstrução/Art. 17/Abstenção
                 if (sessao.votacoes.length > 0) {
                   sessao.votacoes.forEach(votacao => {
                     resultado.votos.totalDeVotacoes += 1;
@@ -172,6 +178,9 @@ router.get('/:idDeputado/atual', (req, res, next) => {
                             break;
                           case 'Obstrução':
                             resultado.votos.obstrucao += 1;
+                            break;
+                          case 'Abstenção':
+                            resultado.votos.abstencao += 1;
                             break;
                           case 'Art. 17':
                             resultado.votos.art17 += 1;
@@ -211,8 +220,6 @@ router.get('/:idDeputado/historico', (req, res, next) => {
         }
       });
 
-      console.log(baseUrl);
-
       axios.get(baseUrl)
         .then(legislaturas => {
           // const legislaturas = {
@@ -248,6 +255,7 @@ router.get('/:idDeputado/historico', (req, res, next) => {
               sim: 0,
               nao: 0,
               obstrucao: 0,
+              abstencao: 0,
               art17: 0,
 
               totalDeVotos: 0,
@@ -268,7 +276,6 @@ router.get('/:idDeputado/historico', (req, res, next) => {
                   {},
                   { limit, skip: limit * skip })
                   .then((sessoes) => {
-                    console.log(sessoes.length);
                     if (sessoes.length > 0) {
                       skip += 1;
                     } else {
@@ -281,7 +288,7 @@ router.get('/:idDeputado/historico', (req, res, next) => {
                         resultado.sessoes.presente += 1;
                       }
 
-                      // Aggregate de Sim/Não/Obstrução/Art. 17
+                      // Aggregate de Sim/Não/Obstrução/Art. 17/Abstenção
                       if (sessao.votacoes.length > 0) {
                           sessao.votacoes.forEach(votacao => {
                             resultado.votos.totalDeVotacoes += 1;
@@ -297,6 +304,9 @@ router.get('/:idDeputado/historico', (req, res, next) => {
                                 case 'Obstrução':
                                   resultado.votos.obstrucao += 1;
                                   break;
+                                case 'Abstenção':
+                                    resultado.votos.abstencao += 1;
+                                    break;
                                 case 'Art. 17':
                                   resultado.votos.art17 += 1;
                                   break;
