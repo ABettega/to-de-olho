@@ -333,7 +333,6 @@ router.get('/senadores/historico', (req, res) => {
       SenadoAtual.find()
         .then((senadoresAtuais) => {
           const todosSenadores = senadores.concat(senadoresAtuais);
-          console.log(todosSenadores);
           res.status(200).json({ todosSenadores });
         })
         .catch(e => console.log(e));
