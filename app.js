@@ -67,7 +67,7 @@ app.use(passport.session());
 
 app.use(cors({
   credentials: true,
-  origin: ['http://localhost:3000']
+  origin: ['http://todeolho.ironhackers.tech']
 }));
 
 app.use('/deputados/sessoes/', require('./routes/deputados/sessoes'));
@@ -76,5 +76,10 @@ app.use('/deputados/', require('./routes/deputados/deputados'));
 app.use('/auth/', require('./routes/auth'));
 app.use('/dashboard', require('./routes/dashboard'))
 app.use('/', require('./routes/index'));
+
+app.use((req, res, next) => {
+  // If no routes match, send them the React HTML.
+  res.sendFile(__dirname + "/public/index.html");
+});
 
 module.exports = app;
