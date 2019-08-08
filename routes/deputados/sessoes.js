@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios').create({});
+// const axios = require('axios').create({});
 const Deputado = require('../../models/Deputado')
 const SessaoCamara = require('../../models/SessaoCamara');
 
@@ -8,6 +8,31 @@ const toTitleCase = (str) => {
   const arr = ['da', 'das', 'de', 'do', 'dos', 'e'];
   return str.toLowerCase().split(' ').map(a => arr.includes(a) ? a : a[0].toUpperCase() + a.slice(1)).join(' ');
 }
+
+// Pega todas as sessões que um deputado estava presente ou faltou
+router.post('/info/:legis/:situacao', (req, res, next) => {
+  // console.log(req.body);
+  const {legislaturas, nomeDeputado} = req.body;
+  const resultado = [];
+
+  SessaoCamara.find({ dataInicio: { $gte: new Date(legislaturas[0].dataInicio), $lte: new Date(legislaturas[0].dataFim) }}, {nomeDaSessao: 1, listaDePresenca: 1 })
+  .then(sessoes => {
+
+    sessoes.forEach(sessao => {
+      if(sessao.listaDePresenca.includes(toTitleCase(nomeDeputado))) {
+        if (req.params.situacao === 'presenca') {
+          const {_id, nomeDaSessao} = sessao;
+          resultado.push({_id, nomeDaSessao});
+        }
+      } else if (req.params.situacao === 'ausencia') {
+        resultado.push({_id, nomeDaSessao});
+      }
+    });
+
+    res.status(200).json(resultado);
+  })
+  .catch(e => res.status(400).json(e));
+});
 
 //Pegar a presença e votos da legislatura atual de um deputado
 router.get('/:idDeputado/atual', (req, res, next) => {
@@ -17,21 +42,22 @@ router.get('/:idDeputado/atual', (req, res, next) => {
   .then(dep => {
       let baseUrl = 'https://dadosabertos.camara.leg.br/api/v2/legislaturas?ordem=DESC&itens=1';
 
-      axios.get(baseUrl)
-        .then(legislaturas => {
-          // const legislaturas = {
-          //   data: {
-          //     dados: [{
-          //       id: 56,
-          //       dataInicio: '2019-01-01',
-          //       dataFim: '2022-12-31',
-          //     }],
-          //   }
-          // }
+      // axios.get(baseUrl)
+      //   .then(legislaturas => {
+          const legislaturas = {
+            data: {
+              dados: [{
+                id: 56,
+                dataInicio: '2019-01-01',
+                dataFim: '2022-12-31',
+              }],
+            }
+          }
           const legis = legislaturas.data.dados[0];
           delete legis['uri'];
           if(dep.idLegislatura.sort((a, b) => b - a)[0] !== legis.id) {
             res.status(200).json({});
+            return;
           }
 
           let resultado = {
@@ -100,8 +126,8 @@ router.get('/:idDeputado/atual', (req, res, next) => {
               res.status(200).json(resultado);
             })
             .catch(e => console.log(e));
-        })
-        .catch(e => console.log(e));
+        // })
+        // .catch(e => console.log(e));
     })
     .catch(e => console.log(e));
 });
@@ -120,28 +146,31 @@ router.get('/:idDeputado/historico', (req, res, next) => {
         }
       });
 
-      axios.get(baseUrl)
-        .then(legislaturas => {
-          // const legislaturas = {
-          //   data: {
-          //     dados: [{
-          //       id: 56,
-          //       dataInicio: '2019-01-01',
-          //       dataFim: '2022-12-31',
-          //     }, {
-          //       id: 55,
-          //       dataInicio: '2015-01-01',
-          //       dataFim: '2018-12-31',
-          //     }
-          //   ],
-          //   }
-          // }
+      // axios.get(baseUrl)
+      //   .then(legislaturas => {
+          const legislaturas = {
+            data: {
+              dados: [{
+                id: 56,
+                dataInicio: '2019-01-01',
+                dataFim: '2022-12-31',
+              }, {
+                id: 55,
+                dataInicio: '2015-01-01',
+                dataFim: '2018-12-31',
+              }
+            ],
+            }
+          }
           legislaturas.data.dados.forEach(legis => {
             delete legis['uri'];
           })
 
           let resultado = {
             nomeDeputado: dep.nomeDeputado,
+            uf: dep.siglaUf,
+            partido: dep.siglaPartido,
+            foto: dep.urlFoto,
             legislaturas: legislaturas.data.dados,
             sessoes: {
               total: 0,
@@ -219,8 +248,8 @@ router.get('/:idDeputado/historico', (req, res, next) => {
             resultado.votos.percentualDeVotos = ((resultado.votos.totalDeVotos / resultado.votos.totalDeVotacoes) * 100).toFixed(0) + '%';
             await res.status(200).json(resultado);
           })();
-        })
-        .catch(e => console.log(e));
+        // })
+        // .catch(e => console.log(e));
     })
     .catch(e => console.log(e));
 });
