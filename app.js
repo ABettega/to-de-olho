@@ -70,8 +70,8 @@ app.use(cors({
   origin: ['http://localhost:3000']
 }));
 
-app.use('/deputados/propostas/', require('./routes/deputados/propostas'));
 app.use('/deputados/sessoes/', require('./routes/deputados/sessoes'));
+app.use('/deputados/propostas/', require('./routes/deputados/propostas'));
 app.use('/deputados/', require('./routes/deputados/deputados'));
 app.use('/auth/', require('./routes/auth'));
 app.use('/dashboard', require('./routes/dashboard'))
