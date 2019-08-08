@@ -108,12 +108,15 @@ router.get('/verify/:email', (req, res, next) => {
 });
 
 router.get('/logout', (req, res, next) => {
-  req.logout();
-  res.status(200).json({ message: 'Log out com sucesso!' });
+  req.session.destroy((err) => {
+    req.user = null;
+    req.logout();
+    res.status(200).json({ message: 'Log out com sucesso!' });
+  });
 });
 
 router.get('/loggedin', (req, res, next) => {
-  req.isAuthenticated() ? res.status(200).json(req.user) : res.status(401).json({ message: 'Você não está logado!' });
+  req.isAuthenticated() ? res.status(200).json(req.user) : res.status(200).json({ message: 'Você não está logado!' });
 });
 
 module.exports = router;

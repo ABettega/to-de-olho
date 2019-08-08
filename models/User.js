@@ -12,8 +12,8 @@ const userSchema = new Schema({
   month: {type: String, required: true},
   year: {type: Number, required: true},
   validated: {type: Boolean, default: false},
-  depFavoritos: [{type: String, ref: 'Deputado'}],
-  senFavoritos: [{type: String, ref: 'SenadoTodos'}]
+  depFavoritos: [{type: String}],
+  senFavoritos: [{type: String}]
 });
 
 const User = mongoose.model('User', userSchema);
