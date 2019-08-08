@@ -9,6 +9,7 @@ const logger = require('morgan');
 const path = require('path');
 const passport = require('./config/passport')
 const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 const cors = require('cors');
 
 mongoose
@@ -55,6 +56,10 @@ app.use(session({
   secret: "rest-api-nitido",
   resave: true,
   saveUninitialized: true,
+  store: new MongoStore({
+    mongooseConnection: mongoose.connection,
+    ttl: 24 * 60 * 60
+  })
 }));
 
 app.use(passport.initialize());
@@ -65,10 +70,12 @@ app.use(cors({
   origin: ['http://localhost:3000']
 }));
 
-app.use('/deputados/propostas/', require('./routes/deputados/propostas'));
+app.use('/deputados/votacoes/', require('./routes/deputados/votacoes'));
 app.use('/deputados/sessoes/', require('./routes/deputados/sessoes'));
+app.use('/deputados/propostas/', require('./routes/deputados/propostas'));
 app.use('/deputados/', require('./routes/deputados/deputados'));
 app.use('/auth/', require('./routes/auth'));
+app.use('/dashboard', require('./routes/dashboard'))
 app.use('/', require('./routes/index'));
 
 module.exports = app;
