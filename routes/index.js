@@ -93,8 +93,7 @@ router.get('/senadores/:id/comissoes/votos', (req, res) => {
     .catch(e => console.log(e));
 });
 
-router.get('/senadores/sessoes/:id', (req, res) => {
-  console.log('DEU GET ATUAL');
+router.get('/senadores/:id/sessoes/', (req, res) => {
   let { id } = req.params;
   id = Number(id);
   let nome = '';
@@ -132,7 +131,6 @@ router.get('/senadores/sessoes/:id', (req, res) => {
   const mandatos = {
     dataInicio: [],
     dataFim: [],
-    tipoCausaFimExercicio: [],
   };
 
   const sum = (obj) => {
@@ -140,9 +138,8 @@ router.get('/senadores/sessoes/:id', (req, res) => {
   };
 
   const getDados = sessoes.SenadoSessoes.find()
-    .then((sessoes) => {
-      console.log('ENTROU THEN DB SESSOES ATUAL');
-      sessoes.map((sessao) => {
+    .then((seshs) => {
+      seshs.map((sessao) => {
         return sessao.Votacao.map((vot) => {
           return vot.Votos.VotoParlamentar.map((votPar) => {
             if (votPar.CodigoParlamentar === id) {
@@ -179,17 +176,11 @@ router.get('/senadores/sessoes/:id', (req, res) => {
       if (response.data.parlamentar.exercicios.exercicio.length === undefined) {
         mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.dataInicio;
         mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.dataFim;
-        mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.tipoCausaFimExercicio;
+        // mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.tipoCausaFimExercicio;
       } else {
-        response.data.parlamentar.exercicios.exercicio.forEach((ex) => {
-        // eslint-disable-next-line no-restricted-syntax
-          for (let [key, value] of Object.entries(ex)) {
-            mandatos[key] += `${value} `;
-          }
-          mandatos.dataInicio = mandatos.dataInicio.split(/[\s,]/);
-          mandatos.dataFim = mandatos.dataFim.split(/[\s,]/);
-          mandatos.tipoCausaFimExercicio = mandatos.tipoCausaFimExercicio.split(/[\s,]/);
-        });
+        mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.map(ex => ex.dataInicio);
+        mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.map(ex => ex.dataFim);
+        // mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.map(ex => ex.tipoCausaFimExercicio);
       }
     })
     .catch(e => console.log(e));
@@ -256,7 +247,6 @@ router.get('/senadores/historico/sessoes/:id', (req, res) => {
   const mandatos = {
     dataInicio: [],
     dataFim: [],
-    tipoCausaFimExercicio: [],
   };
 
   const sum = (obj) => {
@@ -302,17 +292,11 @@ router.get('/senadores/historico/sessoes/:id', (req, res) => {
       if (response.data.parlamentar.exercicios.exercicio.length === undefined) {
         mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.dataInicio;
         mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.dataFim;
-        mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.tipoCausaFimExercicio;
+        // mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.tipoCausaFimExercicio;
       } else {
-        response.data.parlamentar.exercicios.exercicio.forEach((ex) => {
-        // eslint-disable-next-line no-restricted-syntax
-          for (let [key, value] of Object.entries(ex)) {
-            mandatos[key] += `${value} `;
-          }
-          mandatos.dataInicio = mandatos.dataInicio.split(/[\s,]/);
-          mandatos.dataFim = mandatos.dataFim.split(/[\s,]/);
-          mandatos.tipoCausaFimExercicio = mandatos.tipoCausaFimExercicio.split(/[\s,]/);
-        });
+        mandatos.dataInicio = response.data.parlamentar.exercicios.exercicio.map(ex => ex.dataInicio);
+        mandatos.dataFim = response.data.parlamentar.exercicios.exercicio.map(ex => ex.dataFim);
+        // mandatos.tipoCausaFimExercicio = response.data.parlamentar.exercicios.exercicio.map(ex => ex.tipoCausaFimExercicio);
       }
     })
     .catch(e => console.log(e));
@@ -321,21 +305,23 @@ router.get('/senadores/historico/sessoes/:id', (req, res) => {
     .then(() => {
       res.status(200).json({
         nome,
-        sigla,
         uf,
-        voto: votoSenador,
-        totalDeVotos,
-        faltasSenador,
-        votosRegistrados,
-        totalDeSessoes,
-        presencaPorcentagem,
-        diasDeLicenca,
-        diasEmMissao,
-        diasEmAP,
-        obstrucoes,
-        naoVotou,
-        mandatos,
+        sigla,
         UrlFotoParlamentar,
+        historico: {
+          voto: votoSenador,
+          totalDeVotos,
+          faltasSenador,
+          votosRegistrados,
+          totalDeSessoes,
+          presencaPorcentagem,
+          diasDeLicenca,
+          diasEmMissao,
+          diasEmAP,
+          obstrucoes,
+          naoVotou,
+          mandatos,
+        },
       });
     })
     .catch(e => console.log(e));
@@ -343,7 +329,10 @@ router.get('/senadores/historico/sessoes/:id', (req, res) => {
 
 router.get('/senadores/historico', (req, res) => {
   SenadoTodos.find()
-    .then(senadores => res.status(200).json(senadores))
+    .then((senadores) => {
+      console.log(senadores[0]);
+      res.status(200).json(senadores);
+    })
     .catch(e => console.log(e));
 });
 
