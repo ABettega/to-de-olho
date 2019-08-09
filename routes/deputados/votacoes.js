@@ -18,7 +18,7 @@ router.get('/:idVotacao', (req, res, next) => {
             proposicao: votacao.proposicao, 
             modo: votacao.modo,
             votos: votacao.votos,
-            data: showDate(JSON.stringify(sessao[0].dataInicio).slice(1, 10)),
+            data: showDate(JSON.stringify(sessao[0].dataInicio).slice(1, 11)),
           });
         }
       });
