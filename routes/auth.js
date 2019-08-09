@@ -116,7 +116,7 @@ router.get('/logout', (req, res, next) => {
 });
 
 router.get('/loggedin', (req, res, next) => {
-  req.isAuthenticated() ? res.status(200).json(req.user) : res.status(200).json({ message: 'Você não está logado!' });
+  req.isAuthenticated() ? res.status(200).json(req.user) : res.status(200).json(null);
 });
 
 module.exports = router;
