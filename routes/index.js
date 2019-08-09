@@ -135,6 +135,20 @@ router.get('/senadores/:id/sessoes/', (req, res) => {
     return Object.keys(obj).reduce((acc, key) => acc + parseFloat(obj[key] || 0), 0);
   };
 
+  const getSigla = SenadoAtual.find({ 'IdentificacaoParlamentar.CodigoParlamentar': id })
+    .then((senador) => {
+      if (senador.length < 1) {
+        axios.get(`http://legis.senado.leg.br/dadosabertos/senador/${id}`)
+          .then((response) => {
+            sigla = response.data.DetalheParlamentar.Parlamentar.FiliacaoAtual.Partido.SiglaPartido;
+          })
+          .catch(e => console.log(e));
+      } else {
+        sigla = senador[0].IdentificacaoParlamentar.SiglaPartidoParlamentar;
+      }
+    })
+    .catch(e => console.log(e));
+
   const getDados = sessoes.SenadoSessoes.find()
     .then((seshs) => {
       seshs.map((sessao) => {
@@ -148,7 +162,6 @@ router.get('/senadores/:id/sessoes/', (req, res) => {
               } else {
                 votoSenador[voto] = 1;
               }
-              sigla = votPar.SiglaPartido;
               uf = votPar.SiglaUF;
               faltasSenador = votoSenador.NCom;
               UrlFotoParlamentar = votPar.Foto;
@@ -181,7 +194,7 @@ router.get('/senadores/:id/sessoes/', (req, res) => {
     })
     .catch(e => console.log(e));
 
-  Promise.all([getDados, getMandatos])
+  Promise.all([getDados, getMandatos, getSigla])
     .then(() => {
       res.status(200).json({
         nome,
