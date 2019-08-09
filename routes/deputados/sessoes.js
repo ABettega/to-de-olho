@@ -135,6 +135,7 @@ router.get('/:idDeputado/atual', (req, res, next) => {
             uf: dep.siglaUf,
             partido: dep.siglaPartido,
             foto: dep.urlFoto,
+            email: dep.email,
             legislatura: legis,
             sessoes: {
               total: 0,
@@ -240,12 +241,14 @@ router.get('/:idDeputado/historico', (req, res, next) => {
             delete legis['uri'];
           })
 
+          console.log(dep);
           const resultado = {
             nomeDeputado: dep.nomeDeputado,
             uf: dep.siglaUf,
             partido: dep.siglaPartido,
             foto: dep.urlFoto,
             legislaturas: legislaturas.data.dados,
+            email: dep.email,
             sessoes: {
               total: 0,
               presente: 0,
