@@ -1,5 +1,14 @@
 # To De Olho! - Server
 
+## Colaboradores
+[@MFAlexandreMF](https://github.com/MFAlexandreMF) - Alexandre Montesso Bonomi
+
+[@ABettega](https://github.com/ABettega) - Aroldo Bettega Neto
+
+[@gabrieladias99](https://github.com/gabrieladias99) - Gabriela Dias
+
+[@porissawa](https://github.com/porissawa) - Pedro Morissawa
+
 ## O que é o [To De Olho!](https://to-de-olho-app.herokuapp.com)?
 O aplicativo nasceu da necessidade de acompanhar a atuação dos políticos eleitos, para facilitar a prestação de contas para com o povo. A Lei de Acesso a Informação nos garante que todos os dados pertinentes estão livremente disponíveis na web. O Tô De Olho apenas categoriza estes dados de forma mais simples para o usuário.
 
