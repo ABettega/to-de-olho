@@ -1,7 +1,7 @@
 # To De Olho! - Server
 
 ## Colaboradores
-[@MFAlexandreMF](https://github.com/MFAlexandreMF) - Alexandre Montesso Bonomi
+[@MBAlexandreMB](https://github.com/MBAlexandreMB) - Alexandre Montesso Bonomi
 
 [@ABettega](https://github.com/ABettega) - Aroldo Bettega Neto
 
